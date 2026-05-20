@@ -735,6 +735,7 @@
             }
         }
 
+        // --- CHARGEMENT DE LA BASE INTERNET AU DÉMARRAGE (CORRIGÉ) ---
         async function loadDB() {
             if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "TON_BIN_ID_ICI") {
                 updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
@@ -746,16 +747,28 @@
                 const response = await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`);
                 if (response.ok) {
                     const onlineData = await response.json();
-                    if (onlineData && onlineData.courses && onlineData.watchlist && onlineData.animeStats) {
+                    
+                    // Cas 1 : Si le cloud est totalement vide ({}), on l'initialise avec nos données locales
+                    if (!onlineData || Object.keys(onlineData).length === 0) {
+                        await saveDB(); 
+                        return;
+                    }
+
+                    // Cas 2 : Si le cloud contient bien nos structures, on met à jour le téléphone
+                    if (onlineData.courses && onlineData.watchlist && onlineData.animeStats) {
                         appData = onlineData;
                         localStorage.setItem('courses_db', JSON.stringify(appData.courses));
                         localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
                         localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
                         updateSyncWidget("☁️", "À jour", "var(--color-green)", true);
+                    } else {
+                        updateSyncWidget("⚠️", "Structure Cloud incorrecte", "var(--color-yellow)", false);
                     }
+                } else {
+                    updateSyncWidget("❌", `Erreur Cloud (${response.status})`, "var(--color-pink)", false);
                 }
             } catch (err) {
-                updateSyncWidget("❌", "Hors-ligne (Local)", "var(--color-pink)", false);
+                updateSyncWidget("❌", "Hors-ligne (Erreur réseau)", "var(--color-pink)", false);
             }
         }
 
