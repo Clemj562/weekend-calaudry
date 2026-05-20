@@ -257,12 +257,30 @@
         .progress-container { background: #e0e0e0; border: 2px solid var(--border-color); height: 20px; border-radius: var(--radius-pill); overflow: hidden; }
         .progress-bar { background: var(--color-green); height: 100%; width: 0%; transition: width 0.3s ease; }
 
-        /* WIDGET SYNCHRO FLOTTANT */
+        /* WIDGET SYNCHRO FLOTTANT (ANIMÉ & ADAPTÉ PC / MOBILE) */
         #sync-status-widget {
             position: fixed; bottom: 20px; right: 20px; background: var(--white); 
             border: var(--border-width) solid var(--border-color); padding: 8px 15px; 
             border-radius: var(--radius); font-weight: 700; box-shadow: 4px 4px 0px var(--border-color); 
-            z-index: 2000; font-size: 13px; font-family: 'Space Grotesk'; transition: var(--transition);
+            z-index: 2000; font-size: 13px; font-family: 'Space Grotesk';
+            display: flex; align-items: center; gap: 8px;
+            transition: padding 0.3s ease, gap 0.3s ease;
+        }
+        #sync-status-widget .sync-text {
+            display: inline-block;
+            max-width: 250px;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: max-width 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease;
+        }
+        /* Style condensé si l'état est synchronisé */
+        #sync-status-widget.is-synced {
+            padding: 8px 12px;
+            gap: 0;
+        }
+        #sync-status-widget.is-synced .sync-text {
+            max-width: 0;
+            opacity: 0;
         }
 
         @media (max-width: 768px) {
@@ -271,7 +289,8 @@
             .nav-links { display: none; flex-direction: column; width: 100%; gap: 8px; padding-top: 12px; }
             .nav-links.open { display: flex; }
             .meals, .watchlist-grid, .caddie-grid, .home-grid { grid-template-columns: 1fr; }
-            #sync-status-widget { bottom: auto; top: 90px; right: 15px; padding: 5px 10px; font-size: 11px; }
+            /* Alignement en bas identique sur mobile */
+            #sync-status-widget { bottom: 15px; right: 15px; }
         }
     </style>
 </head>
@@ -282,7 +301,7 @@
     <div class="bg-blob blob-2"></div>
     <div class="bg-blob blob-3"></div>
 
-    <div id="sync-status-widget">☁️ Mode Local (Hors-ligne)</div>
+    <div id="sync-status-widget"><span class="sync-icon">☁️</span><span class="sync-text"> Mode Local (Hors-ligne)</span></div>
 
     <nav>
         <div class="hamburger-menu" id="burger-btn" onclick="toggleMenu()">
@@ -491,40 +510,24 @@
             <div class="mood-grid">
                 <div class="mood-card">
                     <div class="mood-header">Fantasy 🪄</div>
-                    <ul>
-                        <li>Witch Hat Atelier</li>
-                        <li>Yona of the Dawn</li>
-                        <li>Overlord</li>
-                    </ul>
+                    <ul id="mood-fantasy"></ul>
                 </div>
                 <div class="mood-card">
                     <div class="mood-header">Émotion 💧</div>
-                    <ul>
-                        <li>Assassination Classroom</li>
-                        <li>One Piece</li>
-                        <li>Studio Ghibli</li>
-                    </ul>
+                    <ul id="mood-emotion"></ul>
                 </div>
                 <div class="mood-card">
                     <div class="mood-header">Hype ⚡</div>
-                    <ul>
-                        <li>Solo Leveling</li>
-                        <li>Jujutsu Kaisen</li>
-                        <li>Shangri-La Frontier</li>
-                    </ul>
+                    <ul id="mood-hype"></ul>
                 </div>
                 <div class="mood-card">
                     <div class="mood-header">Cozy 🍃</div>
-                    <ul>
-                        <li>Spy × Family</li>
-                        <li>Tueuse de slime 300 ans</li>
-                        <li>Les Carnets de l'Apothicaire</li>
-                    </ul>
+                    <ul id="mood-cozy"></ul>
                 </div>
             </div>
 
             <div class="brutal-card" style="margin-bottom: 40px;">
-                <h3 class="font-display" style="margin-bottom: 15px; font-size: 20px;">⚙️ Ajouter / Modifier un Anime du Tableau</h3>
+                <h3 class="font-display" id="form-anime-title" style="margin-bottom: 15px; font-size: 20px;">⚙️ Ajouter un nouvel Anime</h3>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
                     <div style="flex: 2; min-width: 200px;">
                         <label style="font-weight:700; display:block; margin-bottom:5px; font-size:14px;">Nom du média</label>
@@ -555,7 +558,24 @@
                             <option value="TRÈS long">TRÈS long</option>
                         </select>
                     </div>
-                    <button onclick="addOrUpdateAnimeStat()" class="brutal-btn-small" style="background: var(--color-green); height:47px; padding: 0 20px;">Enregistrer</button>
+                    <div style="flex: 1; min-width: 120px;">
+                        <label style="font-weight:700; display:block; margin-bottom:5px; font-size:14px;">Mood</label>
+                        <select id="stat-mood" class="brutal-input" style="width:100%; height:47px; padding: 5px 10px; cursor:pointer;">
+                            <option value="Aucun">Aucun</option>
+                            <option value="Fantasy">Fantasy 🪄</option>
+                            <option value="Émotion">Émotion 💧</option>
+                            <option value="Hype">Hype ⚡</option>
+                            <option value="Cozy">Cozy 🍃</option>
+                        </select>
+                    </div>
+                    <div style="flex: 2; min-width: 180px;">
+                        <label style="font-weight:700; display:block; margin-bottom:5px; font-size:14px;">Note globale / Avis</label>
+                        <input type="text" id="stat-note" placeholder="Ex: Masterclass absolue..." class="brutal-input" style="width:100%;">
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="addOrUpdateAnimeStat()" id="submit-stat-btn" class="brutal-btn-small" style="background: var(--color-green); height:47px; padding: 0 20px;">Ajouter</button>
+                        <button onclick="resetAnimeStatForm()" id="cancel-stat-btn" class="brutal-btn-small" style="background: var(--color-pink); color: white; height:47px; padding: 0 15px; display: none;" title="Annuler la modification">Annuler</button>
+                    </div>
                 </div>
             </div>
 
@@ -569,6 +589,8 @@
                             <th>Humour</th>
                             <th>Univers</th>
                             <th>Taille</th>
+                            <th>Mood</th>
+                            <th>Note / Commentaire</th>
                             <th style="text-align: center; width: 100px;">Actions</th>
                         </tr>
                     </thead>
@@ -611,8 +633,8 @@
 
     <script>
         // --- ☁️ CONFIGURATION CLOUD (MÉTHODE 2) ---
-        // Colle l'ID fourni par npoint.io entre les guillemets ci-dessous pour activer le partage synchrone.
-        const NPOINT_BIN_ID = "1edcd2b184852d809c46"; 
+        // Colle ton ID unique npoint.io entre les guillemets ci-dessous.
+        const NPOINT_BIN_ID = "TON_BIN_ID_ICI"; 
 
         const defaultCourses = [
             { id: 1, categorie: '🥩 Crèmerie & Frais', item_name: 'Filets de poulet', est_achete: false },
@@ -657,31 +679,46 @@
         ];
 
         const defaultAnimeStats = [
-            { id: 1, titre: 'Witch Hat Atelier', action: 7, emotion: 8, humour: 6, univers: 10, taille: 'Moyen' },
-            { id: 2, titre: 'Les Carnets de l’Apothicaire', action: 5, emotion: 8, humour: 7, univers: 9, taille: 'Moyen' },
-            { id: 3, titre: 'One Piece', action: 9, emotion: 10, humour: 9, univers: 10, taille: 'TRÈS long' },
-            { id: 4, titre: 'Jujutsu Kaisen', action: 10, emotion: 8, humour: 7, univers: 8, taille: 'Moyen' }
+            { id: 1, titre: 'Witch Hat Atelier', action: 7, emotion: 8, humour: 6, univers: 10, taille: 'Moyen', mood: 'Fantasy', note: 'Visuels à couper le souffle !' },
+            { id: 2, titre: 'Les Carnets de l’Apothicaire', action: 5, emotion: 8, humour: 7, univers: 9, taille: 'Moyen', mood: 'Cozy', note: 'Intrigues captivantes.' },
+            { id: 3, titre: 'One Piece', action: 9, emotion: 10, humour: 9, univers: 10, taille: 'TRÈS long', mood: 'Émotion', note: 'Une aventure légendaire.' },
+            { id: 4, titre: 'Jujutsu Kaisen', action: 10, emotion: 8, humour: 7, univers: 8, taille: 'Moyen', mood: 'Hype', note: 'Animation incroyable.' }
         ];
 
-        // Objet centralisé contenant l'ensemble de la base
         let appData = {
             courses: JSON.parse(localStorage.getItem('courses_db')) || defaultCourses,
             watchlist: JSON.parse(localStorage.getItem('watchlist_db')) || defaultWatchlist,
             animeStats: JSON.parse(localStorage.getItem('animestats_db')) || defaultAnimeStats
         };
 
-        // --- ENREGISTREMENT LOCAL + ENVOI DISTANT (DEBOUNCED) ---
+        // Variable d'état pour suivre la modification en cours
+        let editingAnimeId = null;
+
+        // --- GESTION DE L'INDICATEUR CLOUD ---
+        function updateSyncWidget(icon, text, bg, isSynced = false) {
+            const widget = document.getElementById('sync-status-widget');
+            if (widget) {
+                widget.innerHTML = `<span class="sync-icon">${icon}</span><span class="sync-text"> ${text}</span>`;
+                widget.style.backgroundColor = bg;
+                if (isSynced) {
+                    widget.classList.add('is-synced');
+                } else {
+                    widget.classList.remove('is-synced');
+                }
+            }
+        }
+
         async function saveDB() {
             localStorage.setItem('courses_db', JSON.stringify(appData.courses));
             localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
             localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
 
             if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "TON_BIN_ID_ICI") {
-                updateSyncWidget("☁️ Mode Local (Hors-ligne)", "var(--white)");
+                updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
                 return;
             }
 
-            updateSyncWidget("⏳ Synchronisation...", "var(--color-yellow)");
+            updateSyncWidget("⏳", "Synchronisation...", "var(--color-yellow)", false);
             try {
                 const response = await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`, {
                     method: 'POST',
@@ -689,48 +726,36 @@
                     body: JSON.stringify(appData)
                 });
                 if (response.ok) {
-                    updateSyncWidget("☁️ Synchronisé avec le Cloud", "var(--color-green)");
+                    updateSyncWidget("☁️", "Synchronisé avec le Cloud", "var(--color-green)", true);
                 } else {
-                    updateSyncWidget("❌ Erreur de sauvegarde Cloud", "var(--color-pink)");
+                    updateSyncWidget("❌", "Erreur Cloud", "var(--color-pink)", false);
                 }
             } catch (err) {
-                updateSyncWidget("❌ Problème réseau distant", "var(--color-pink)");
+                updateSyncWidget("❌", "Erreur réseau", "var(--color-pink)", false);
             }
         }
 
-        // --- CHARGEMENT DE LA BASE INTERNET AU DÉMARRAGE ---
         async function loadDB() {
             if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "TON_BIN_ID_ICI") {
-                updateSyncWidget("☁️ Mode Local (Hors-ligne)", "var(--white)");
+                updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
                 return;
             }
 
-            updateSyncWidget("⏳ Récupération...", "var(--color-yellow)");
+            updateSyncWidget("⏳", "Récupération...", "var(--color-yellow)", false);
             try {
                 const response = await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`);
                 if (response.ok) {
                     const onlineData = await response.json();
-                    // On injecte les données récupérées si elles sont valides
                     if (onlineData && onlineData.courses && onlineData.watchlist && onlineData.animeStats) {
                         appData = onlineData;
                         localStorage.setItem('courses_db', JSON.stringify(appData.courses));
                         localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
                         localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
-                        updateSyncWidget("☁️ Données Cloud à jour", "var(--color-green)");
+                        updateSyncWidget("☁️", "À jour", "var(--color-green)", true);
                     }
-                } else {
-                    updateSyncWidget("❌ Échec de chargement", "var(--color-pink)");
                 }
             } catch (err) {
-                updateSyncWidget("❌ Hors-ligne (Données locales)", "var(--color-pink)");
-            }
-        }
-
-        function updateSyncWidget(text, bg) {
-            const widget = document.getElementById('sync-status-widget');
-            if (widget) {
-                widget.innerText = text;
-                widget.style.backgroundColor = bg;
+                updateSyncWidget("❌", "Hors-ligne (Local)", "var(--color-pink)", false);
             }
         }
 
@@ -757,33 +782,41 @@
         window.addEventListener('DOMContentLoaded', async () => {
             const activeTab = localStorage.getItem('active_tab_weekend') || 'home';
             switchTab(activeTab);
-            
-            // 1. On interroge le cloud en premier
             await loadDB();
-            
-            // 2. On affiche le rendu dynamique
             renderCaddie();
             renderWatchlist();
             renderAnimeStatsTable();
         });
 
-        // --- INTERFACE DYNAMIQUE DU TABLEAU DES SCORES ---
+        // --- UNIVER ANIME : TABLEAU & FILTRES MOODS DYNAMIQUES ---
         function renderAnimeStatsTable() {
             const tbody = document.getElementById('anime-table-body');
             if (!tbody) return;
             tbody.innerHTML = '';
 
+            // Préparation des listes de mood au-dessus du tableau
+            const moodContainers = {
+                'Fantasy': document.getElementById('mood-fantasy'),
+                'Émotion': document.getElementById('mood-emotion'),
+                'Hype': document.getElementById('mood-hype'),
+                'Cozy': document.getElementById('mood-cozy')
+            };
+            Object.values(moodContainers).forEach(el => { if(el) el.innerHTML = ''; });
+
             appData.animeStats.forEach(item => {
+                // Remplissage du tableau HTML
                 tbody.innerHTML += `
                     <tr>
-                        <td>${item.titre}</td>
+                        <td><strong>${item.titre}</strong></td>
                         <td><span class="${item.action >= 9 ? 'badge high' : 'badge'}">${item.action}</span></td>
                         <td><span class="${item.emotion >= 9 ? 'badge high' : 'badge'}">${item.emotion}</span></td>
                         <td><span class="${item.humour >= 9 ? 'badge high' : 'badge'}">${item.humour}</span></td>
                         <td><span class="${item.univers >= 9 ? 'badge high' : 'badge'}">${item.univers}</span></td>
                         <td>${item.taille}</td>
+                        <td><span class="badge" style="background:var(--text-main); color:var(--white); font-size:12px;">${item.mood || 'Aucun'}</span></td>
+                        <td style="white-space: normal; max-width: 220px; font-style: italic; color:#555;">${item.note || '-'}</td>
                         <td style="text-align: center;">
-                            <button onclick="fillAnimeStatForm('${item.titre}')" class="brutal-btn-small" style="padding: 4px 8px; font-size: 11px; background: var(--color-blue); color: white; margin-right: 4px;" title="Modifier">
+                            <button onclick="fillAnimeStatForm(${item.id})" class="brutal-btn-small" style="padding: 4px 8px; font-size: 11px; background: var(--color-blue); color: white; margin-right: 4px;" title="Modifier">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
                             <button onclick="deleteAnimeStat(${item.id})" class="delete-btn" style="width:24px; height:24px; font-size:11px;" title="Supprimer">
@@ -792,54 +825,103 @@
                         </td>
                     </tr>
                 `;
+
+                // Remplissage simultané de la partie Moods au-dessus
+                if (item.mood && moodContainers[item.mood]) {
+                    moodContainers[item.mood].innerHTML += `<li>${item.titre}</li>`;
+                }
+            });
+
+            // Afficher un petit indicateur si un mood est vide
+            Object.keys(moodContainers).forEach(key => {
+                if(moodContainers[key] && moodContainers[key].innerHTML === '') {
+                    moodContainers[key].innerHTML = '<li style="opacity:0.5; font-style:italic;">Aucun anime inscrit</li>';
+                }
             });
         }
 
         function addOrUpdateAnimeStat() {
-            const titleInput = document.getElementById('stat-title');
-            const titre = titleInput.value.trim();
+            const titre = document.getElementById('stat-title').value.trim();
             const action = parseInt(document.getElementById('stat-action').value) || 0;
             const emotion = parseInt(document.getElementById('stat-emotion').value) || 0;
             const humour = parseInt(document.getElementById('stat-humour').value) || 0;
             const univers = parseInt(document.getElementById('stat-univers').value) || 0;
             const taille = document.getElementById('stat-taille').value;
+            const mood = document.getElementById('stat-mood').value;
+            const note = document.getElementById('stat-note').value.trim();
 
             if (!titre) return;
 
-            // Recherche si l'anime existe déjà pour faire une mise à jour ou un ajout
-            const index = appData.animeStats.findIndex(a => a.titre.toLowerCase() === titre.toLowerCase());
-
-            if (index > -1) {
-                // Modification
-                appData.animeStats[index] = { ...appData.animeStats[index], action, emotion, humour, univers, taille };
+            if (editingAnimeId !== null) {
+                // Mode EDITION / MODIFICATION
+                const idx = appData.animeStats.findIndex(a => a.id === editingAnimeId);
+                if (idx > -1) {
+                    appData.animeStats[idx] = { id: editingAnimeId, titre, action, emotion, humour, univers, taille, mood, note };
+                }
             } else {
-                // Création
+                // Mode AJOUT
                 appData.animeStats.push({
                     id: Date.now(),
-                    titre, action, emotion, humour, univers, taille
+                    titre, action, emotion, humour, univers, taille, mood, note
                 });
             }
 
-            titleInput.value = '';
+            resetAnimeStatForm();
             saveDB();
             renderAnimeStatsTable();
         }
 
-        function fillAnimeStatForm(titre) {
-            const anime = appData.animeStats.find(a => a.titre === titre);
+        function fillAnimeStatForm(id) {
+            const anime = appData.animeStats.find(a => a.id === id);
             if (!anime) return;
 
+            editingAnimeId = id;
+            
+            // Mutation visuelle de l'interface vers le mode MODIFICATION
+            document.getElementById('form-anime-title').innerText = `📝 Modifier l'anime : ${anime.titre}`;
+            document.getElementById('submit-stat-btn').innerText = "Mettre à jour";
+            document.getElementById('submit-stat-btn').style.backgroundColor = "var(--color-blue)";
+            document.getElementById('submit-stat-btn').style.color = "var(--white)";
+            document.getElementById('cancel-stat-btn').style.display = "inline-block";
+
+            // Remplissage des inputs
             document.getElementById('stat-title').value = anime.titre;
             document.getElementById('stat-action').value = anime.action;
             document.getElementById('stat-emotion').value = anime.emotion;
             document.getElementById('stat-humour').value = anime.humour;
             document.getElementById('stat-univers').value = anime.univers;
             document.getElementById('stat-taille').value = anime.taille;
+            document.getElementById('stat-mood').value = anime.mood || "Aucun";
+            document.getElementById('stat-note').value = anime.note || "";
+            
+            document.getElementById('stat-title').focus();
+        }
+
+        function resetAnimeStatForm() {
+            editingAnimeId = null;
+
+            // Restauration visuelle vers le mode AJOUT standard
+            document.getElementById('form-anime-title').innerText = "⚙️ Ajouter un nouvel Anime";
+            document.getElementById('submit-stat-btn').innerText = "Ajouter";
+            document.getElementById('submit-stat-btn').style.backgroundColor = "var(--color-green)";
+            document.getElementById('submit-stat-btn').style.color = "var(--text-main)";
+            document.getElementById('cancel-stat-btn').style.display = "none";
+
+            // Nettoyage des formulaires
+            document.getElementById('stat-title').value = '';
+            document.getElementById('stat-action').value = 5;
+            document.getElementById('stat-emotion').value = 5;
+            document.getElementById('stat-humour').value = 5;
+            document.getElementById('stat-univers').value = 5;
+            document.getElementById('stat-taille').value = 'Moyen';
+            document.getElementById('stat-mood').value = 'Aucun';
+            document.getElementById('stat-note').value = '';
         }
 
         function deleteAnimeStat(id) {
-            if (confirm("Supprimer cet élément du tableau de statistiques ?")) {
+            if (confirm("Supprimer définitivement cet anime de la liste globale ?")) {
                 appData.animeStats = appData.animeStats.filter(a => a.id !== id);
+                if (editingAnimeId === id) resetAnimeStatForm();
                 saveDB();
                 renderAnimeStatsTable();
             }
