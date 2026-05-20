@@ -257,7 +257,7 @@
         .progress-container { background: #e0e0e0; border: 2px solid var(--border-color); height: 20px; border-radius: var(--radius-pill); overflow: hidden; }
         .progress-bar { background: var(--color-green); height: 100%; width: 0%; transition: width 0.3s ease; }
 
-        /* WIDGET CLOUD RETRACTABLE (ACCESSIBLE EN BAS PC & MOBILE) */
+        /* WIDGET CLOUD RETRACTABLE FIABLE (PC & MOBILE) */
         #sync-status-widget {
             position: fixed; bottom: 20px; right: 20px; background: var(--white); 
             border: var(--border-width) solid var(--border-color); padding: 8px 15px; 
@@ -268,7 +268,7 @@
         }
         #sync-status-widget .sync-text {
             display: inline-block;
-            max-width: 250px;
+            max-width: 280px;
             overflow: hidden;
             white-space: nowrap;
             transition: max-width 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease;
@@ -630,8 +630,9 @@
     </div>
 
     <script>
-        // --- ☁️ CONFIGURATION CLOUD ASSURÉE (JSONBLOB) ---
-        const JSONBLOB_ID = "019e45fb-beeb-7c14-9045-5f53d4efb685"; 
+        // --- ☁️ CONFIGURATION CLOUD RE-STABILISÉE (NPOINT) ---
+        // Colle à nouveau ton NOUVEL ID créé sur npoint.io entre les guillemets ci-dessous.
+        const NPOINT_BIN_ID = "77ed71b116d350fb39cc"; 
 
         const defaultCourses = [
             { id: 1, categorie: '🥩 Crèmerie & Frais', item_name: 'Filets de poulet', est_achete: false },
@@ -691,6 +692,7 @@
         let editingAnimeId = null;
         let cloudSaveTimeout = null;
 
+        // --- GESTION DE L'INDICATEUR CLOUD FLOTTANT ---
         function updateSyncWidget(icon, text, bg, isSynced = false) {
             const widget = document.getElementById('sync-status-widget');
             if (widget) {
@@ -704,13 +706,13 @@
             }
         }
 
-        // --- SAUVEGARDE INTEGRÉE (LOCAL + CLOUD DEBOUNCED) ---
+        // --- PIPELINE DE SAUVEGARDE INTEGRÉE (LOCAL + CLOUD DEBOUNCED VIA PUT) ---
         function saveDB() {
             localStorage.setItem('courses_db', JSON.stringify(appData.courses));
             localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
             localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
 
-            if (!JSONBLOB_ID || JSONBLOB_ID === "TON_JSONBLOB_ID_ICI") {
+            if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "TON_NOUVEAU_NPOINT_ID") {
                 updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
                 return;
             }
@@ -721,7 +723,7 @@
             cloudSaveTimeout = setTimeout(async () => {
                 updateSyncWidget("⏳", "Envoi Cloud...", "var(--color-yellow)", false);
                 try {
-                    const response = await fetch(`https://jsonblob.com/api/jsonBlob/${JSONBLOB_ID}`, {
+                    const response = await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(appData)
@@ -732,33 +734,33 @@
                         updateSyncWidget("❌", "Erreur Cloud", "var(--color-pink)", false);
                     }
                 } catch (err) {
-                    updateSyncWidget("❌", "Erreur réseau", "var(--color-pink)", false);
+                    updateSyncWidget("❌", `Erreur : ${err.message}`, "var(--color-pink)", false);
                 }
             }, 1000);
         }
 
-        // --- CHARGEMENT DU CLOUD (BLINDÉ ET SÉCURISÉ CONTRE LE VIDE) ---
+        // --- CHARGEMENT DU CLOUD ---
         async function loadDB() {
-            if (!JSONBLOB_ID || JSONBLOB_ID === "TON_JSONBLOB_ID_ICI") {
+            if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "TON_NOUVEAU_NPOINT_ID") {
                 updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
                 return;
             }
 
             updateSyncWidget("⏳", "Vérification...", "var(--color-yellow)", false);
             try {
-                const response = await fetch(`https://jsonblob.com/api/jsonBlob/${JSONBLOB_ID}`);
+                const response = await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`);
                 
                 if (!response.ok) {
-                    updateSyncWidget("❌", `Erreur Cloud (${response.status})`, "var(--color-pink)", false);
+                    updateSyncWidget("❌", `Erreur : ${response.status}`, "var(--color-pink)", false);
                     return;
                 }
 
                 const responseText = await response.text();
                 
-                // Si le cloud est vide : on l'initialise proprement sans faire crasher le JavaScript
+                // Si le cloud est vide : on l'initialise proprement sans faire crasher
                 if (!responseText || responseText.trim() === "" || responseText.trim() === "{}") {
                     updateSyncWidget("⏳", "Initialisation...", "var(--color-yellow)", false);
-                    await fetch(`https://jsonblob.com/api/jsonBlob/${JSONBLOB_ID}`, {
+                    await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(appData)
@@ -778,8 +780,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                // Si la requête échoue totalement (CORS / AdBlock), on affiche un message clair
-                updateSyncWidget("❌", "Mode local actif (Ferme Adblock ?)", "var(--color-pink)", false);
+                updateSyncWidget("❌", `Erreur : ${err.message}`, "var(--color-pink)", false);
             }
         }
 
@@ -1088,7 +1089,6 @@
             }
         }
 
-        // --- ADDBLOCKS SAFETY & MISC ---
         function deleteAnime(slug) {
             if(confirm("Retirer cet anime ?")) {
                 appData.watchlist = appData.watchlist.filter(a => a.slug !== slug);
