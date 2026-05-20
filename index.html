@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WKC</title>
+    <title>Notre Paradis - V4.2 Final Edition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=DM+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -257,7 +257,7 @@
         .progress-container { background: #e0e0e0; border: 2px solid var(--border-color); height: 20px; border-radius: var(--radius-pill); overflow: hidden; }
         .progress-bar { background: var(--color-green); height: 100%; width: 0%; transition: width 0.3s ease; }
 
-        /* WIDGET SYNC */
+        /* WIDGET CLOUD RETRACTABLE PRO (PC & MOBILE) */
         #sync-status-widget {
             position: fixed; bottom: 20px; right: 20px; background: var(--white); 
             border: var(--border-width) solid var(--border-color); padding: 8px 15px; 
@@ -299,7 +299,7 @@
     <div class="bg-blob blob-2"></div>
     <div class="bg-blob blob-3"></div>
 
-    <div id="sync-status-widget"><span class="sync-icon">☁️</span><span class="sync-text"> Connexion...</span></div>
+    <div id="sync-status-widget"><span class="sync-icon">☁️</span><span class="sync-text"> Configuration...</span></div>
 
     <nav>
         <div class="hamburger-menu" id="burger-btn" onclick="toggleMenu()">
@@ -628,16 +628,14 @@
 
     </div>
 
-    <script>
-        // ========================================================
-        // ☁️ CONFIGURATION JSONBIN
-        // ========================================================
-        const JSONBIN_ID  = "6830a06a8960c979a59b07e9"; // ← Ton Bin ID JSONbin
-        const JSONBIN_KEY = "$2a$10$6a0de1e76877513b27a450ec"; // ← Ta Master Key JSONbin
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
-        const JSONBIN_HEADERS_READ  = { 'X-Master-Key': JSONBIN_KEY };
-        const JSONBIN_HEADERS_WRITE = { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY };
+        // ========================================================
+        // ☁️ COLLE TON URL FIREBASE DE BASE DE DONNÉES ICI
+        // ========================================================
+        const DATABASE_URL = "https://weekend-calaudry-default-rtdb.firebaseio.com/"; 
 
         // ========================================================
         // DONNÉES PAR DÉFAUT
@@ -699,10 +697,15 @@
 
         let editingAnimeId = null;
         let cloudSaveTimeout = null;
+        let dbRef = null;
 
-        // ========================================================
-        // WIDGET SYNC
-        // ========================================================
+        // Configuration initiale Firebase
+        if (DATABASE_URL && DATABASE_URL !== "TA_VRAIE_URL_FIREBASE_ICI") {
+            const firebaseApp = initializeApp({ databaseURL: DATABASE_URL });
+            const database = getDatabase(firebaseApp);
+            dbRef = ref(database, "appData");
+        }
+
         function updateSyncWidget(icon, text, bg, isSynced = false) {
             const widget = document.getElementById('sync-status-widget');
             if (!widget) return;
@@ -711,104 +714,56 @@
             isSynced ? widget.classList.add('is-synced') : widget.classList.remove('is-synced');
         }
 
-        // ========================================================
-        // SAUVEGARDE JSONBIN
-        // ========================================================
+        // --- PIPELINE DE SAUVEGARDE INTEGRÉE ---
         function saveDB() {
             localStorage.setItem('courses_db', JSON.stringify(appData.courses));
             localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
             localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
 
-            console.log("⏳ Debounce en cours...");
-            updateSyncWidget("⏳", "Sauvegarde en cours...", "var(--color-yellow)", false);
+            if (!dbRef) {
+                updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
+                return;
+            }
+
+            updateSyncWidget("⏳", "En attente...", "var(--color-yellow)", false);
 
             clearTimeout(cloudSaveTimeout);
-            cloudSaveTimeout = setTimeout(async function runSave() {
-                console.log(`🚀 PUT → ${JSONBIN_URL}`);
-                try {
-                    const response = await fetch(JSONBIN_URL, {
-                        method: 'PUT',
-                        headers: JSONBIN_HEADERS_WRITE,
-                        body: JSON.stringify(appData)
-                    });
-                    console.log(`📊 Statut : ${response.status}`);
-                    if (response.ok) {
-                        console.log("✅ Sauvegardé sur JSONbin !");
-                        updateSyncWidget("☁️", "Synchronisé", "var(--color-green)", true);
-                    } else if (response.status === 429) {
-                        console.warn("⚠️ Rate limit, réessai dans 4s...");
-                        updateSyncWidget("⏳", "Réessai dans 4s...", "var(--color-yellow)", false);
-                        setTimeout(runSave, 4000);
-                    } else {
-                        console.error(`❌ Erreur ${response.status}`);
-                        updateSyncWidget("❌", `Erreur (${response.status})`, "var(--color-pink)", false);
-                    }
-                } catch (err) {
-                    console.error("❌ Erreur réseau :", err);
-                    updateSyncWidget("❌", "Problème réseau", "var(--color-pink)", false);
-                }
-            }, 2000);
+            cloudSaveTimeout = setTimeout(async () => {
+                updateSyncWidget("⏳", "Envoi Firebase...", "var(--color-yellow)", false);
+                set(dbRef, appData)
+                    .then(() => updateSyncWidget("☁️", "Synchronisé", "var(--color-green)", true))
+                    .catch(() => updateSyncWidget("❌", "Échec Firebase", "var(--color-pink)", false));
+            }, 1000);
         }
 
-        // ========================================================
-        // CHARGEMENT JSONBIN
-        // ========================================================
-        async function loadDB() {
-            console.log(`📥 GET → ${JSONBIN_URL}`);
-            updateSyncWidget("⏳", "Vérification...", "var(--color-yellow)", false);
-            try {
-                const response = await fetch(JSONBIN_URL, {
-                    method: 'GET',
-                    headers: JSONBIN_HEADERS_READ
-                });
-                console.log(`📊 Statut : ${response.status}`);
-
-                if (response.status === 429) {
-                    console.warn("⚠️ Rate limit, réessai dans 4s...");
-                    updateSyncWidget("⏳", "Bloqué, réessai...", "var(--color-yellow)", false);
-                    setTimeout(loadDB, 4000);
-                    return;
-                }
-
-                if (response.ok) {
-                    const json = await response.json();
-                    // JSONbin encapsule la réponse dans { record: {...}, metadata: {...} }
-                    const onlineData = json.record || json;
-                    console.log("📦 Données reçues :", onlineData);
-
-                    if (onlineData && onlineData.courses && onlineData.watchlist && onlineData.animeStats) {
-                        appData = onlineData;
-                        localStorage.setItem('courses_db', JSON.stringify(appData.courses));
-                        localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
-                        localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
-                        console.log("✅ Données cloud injectées !");
-                        updateSyncWidget("☁️", "À jour", "var(--color-green)", true);
-                    } else {
-                        console.log("💡 Bin vide ou structure incorrecte, initialisation...");
-                        updateSyncWidget("⏳", "Initialisation...", "var(--color-yellow)", false);
-                        const initResp = await fetch(JSONBIN_URL, {
-                            method: 'PUT',
-                            headers: JSONBIN_HEADERS_WRITE,
-                            body: JSON.stringify(appData)
-                        });
-                        if (initResp.ok) {
-                            console.log("✅ Bin initialisé !");
-                            updateSyncWidget("☁️", "Prêt", "var(--color-green)", true);
-                        }
-                    }
-                } else {
-                    console.error(`❌ Erreur ${response.status}`);
-                    updateSyncWidget("❌", `Erreur (${response.status})`, "var(--color-pink)", false);
-                }
-            } catch (err) {
-                console.error("❌ Erreur réseau :", err);
-                updateSyncWidget("❌", "Mode local actif", "var(--color-pink)", false);
+        // --- ECOUTE EN TEMPS RÉEL (FLUX DISCRET SANS RECHARGEMENT) ---
+        function connectFirebaseRealtime() {
+            if (!dbRef) {
+                updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
+                return;
             }
+
+            updateSyncWidget("⏳", "Vérification...", "var(--color-yellow)", false);
+            onValue(dbRef, (snapshot) => {
+                const onlineData = snapshot.val();
+                if (onlineData && onlineData.courses) {
+                    appData = onlineData;
+                    localStorage.setItem('courses_db', JSON.stringify(appData.courses));
+                    localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
+                    localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
+                    
+                    renderCaddie();
+                    renderWatchlist();
+                    renderAnimeStatsTable();
+                    updateSyncWidget("☁️", "À jour", "var(--color-green)", true);
+                } else {
+                    // Si Firebase est totalement vierge, on y injecte nos structures locales
+                    set(dbRef, appData);
+                }
+            });
         }
 
-        // ========================================================
-        // NAVIGATION
-        // ========================================================
+        // --- NAVIGATION ---
         function toggleMenu() {
             document.getElementById('burger-btn').classList.toggle('open');
             document.getElementById('menu-links').classList.toggle('open');
@@ -825,26 +780,7 @@
             localStorage.setItem('active_tab_weekend', tabId);
         }
 
-        // ========================================================
-        // INIT
-        // ========================================================
-        window.addEventListener('DOMContentLoaded', () => {
-            const activeTab = localStorage.getItem('active_tab_weekend') || 'home';
-            switchTab(activeTab);
-            renderCaddie();
-            renderWatchlist();
-            renderAnimeStatsTable();
-
-            loadDB().then(() => {
-                renderCaddie();
-                renderWatchlist();
-                renderAnimeStatsTable();
-            });
-        });
-
-        // ========================================================
-        // ANIME STATS
-        // ========================================================
+        // --- UNIVER ANIME ---
         function renderAnimeStatsTable() {
             const tbody = document.getElementById('anime-table-body');
             if (!tbody) return;
@@ -959,9 +895,7 @@
             }
         }
 
-        // ========================================================
-        // CADDIE
-        // ========================================================
+        // --- CADDIE ---
         function renderCaddie() {
             const container = document.getElementById('caddie-container');
             container.innerHTML = '';
@@ -1049,9 +983,7 @@
             }
         }
 
-        // ========================================================
-        // WATCHLIST
-        // ========================================================
+        // --- WATCHLIST ---
         function renderWatchlist() {
             const container = document.getElementById('watchlist-container');
             container.innerHTML = '';
@@ -1091,7 +1023,20 @@
             renderWatchlist();
         }
 
-        function updateEp(slug, change) {
+        // --- ALIGNEMENT GLOBAL DES MODULES VERS WINDOW (OBLIGATOIRE POUR TYPE="MODULE") ---
+        window.toggleMenu = toggleMenu;
+        window.switchTab = switchTab;
+        window.addOrUpdateAnimeStat = addOrUpdateAnimeStat;
+        window.fillAnimeStatForm = fillAnimeStatForm;
+        window.resetAnimeStatForm = resetAnimeStatForm;
+        window.deleteAnimeStat = deleteAnimeStat;
+        window.addCaddieCategory = addCaddieCategory;
+        window.addCaddieItem = addCaddieItem;
+        window.toggleCheck = toggleCheck;
+        window.deleteCaddieItem = deleteCaddieItem;
+        window.deleteCategory = deleteCategory;
+        window.addAnime = addAnime;
+        window.updateEp = function(slug, change) {
             const anime = appData.watchlist.find(a => a.slug === slug);
             if (anime) {
                 const newEp = anime.nb_episodes_vus + change;
@@ -1101,20 +1046,15 @@
                     renderWatchlist();
                 }
             }
-        }
-
-        function deleteAnime(slug) {
+        };
+        window.deleteAnime = function(slug) {
             if (confirm("Retirer cet anime ?")) {
                 appData.watchlist = appData.watchlist.filter(a => a.slug !== slug);
                 saveDB();
                 renderWatchlist();
             }
-        }
-
-        // ========================================================
-        // DÉ ALÉATOIRE
-        // ========================================================
-        function rollDice() {
+        };
+        window.rollDice = function() {
             const dice = document.getElementById('dice');
             const resultBox = document.getElementById('dice-result');
             const animeChosen = document.getElementById('anime-chosen');
@@ -1133,7 +1073,22 @@
                 }
                 resultBox.style.display = 'block';
             }, 800);
-        }
+        };
+
+        // --- INIT AU DEMARRAGE ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const activeTab = localStorage.getItem('active_tab_weekend') || 'home';
+            switchTab(activeTab);
+            
+            // Affichage local immédiat pour éviter toute lenteur visuelle
+            renderCaddie();
+            renderWatchlist();
+            renderAnimeStatsTable();
+
+            // Lancement du tunnel temps réel Firebase
+            connectFirebaseRealtime();
+        });
     </script>
 </body>
+
 </html>
