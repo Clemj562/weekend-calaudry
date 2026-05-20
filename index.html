@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notre Paradis - V4.0 GitHub Edition</title>
+    <title>Notre Paradis - V4.1 Full Content Edition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=DM+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -177,6 +177,46 @@
         .info-pill { display: inline-flex; background: #f1f2f6; padding: 6px 12px; border-radius: var(--radius-pill); font-weight: 700; font-size: 13px; border: 2px solid var(--border-color); margin-right: 8px; margin-bottom: 12px; }
         .meal-label { font-family: 'Space Grotesk'; font-size: 16px; font-weight: 700; color: var(--color-pink); margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; }
         .meal-content { font-size: 14px; font-weight: 600; background: #fdfdfd; padding: 12px; border: 2px dashed var(--border-color); border-radius: 8px; white-space: pre-line; margin-bottom: 15px; }
+        .post-it { background: var(--color-yellow); padding: 15px; border: var(--border-width) solid var(--border-color); border-radius: 0 15px 15px 15px; margin-top: 15px; font-weight: 700; transform: rotate(-1deg); box-shadow: 3px 3px 0px var(--border-color); }
+        .btn-link { display: inline-block; background: var(--color-purple); color: var(--white); font-family: 'Space Grotesk'; font-weight: 700; padding: 10px 20px; border: var(--border-width) solid var(--border-color); border-radius: var(--radius-pill); margin-top: 15px; box-shadow: 4px 4px 0px var(--border-color); transition: var(--transition); }
+        .btn-link:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--border-color); }
+
+        .extras-section { background: var(--color-green); padding: 40px; border: var(--border-width) solid var(--border-color); border-radius: var(--radius); box-shadow: var(--shadow-brutal); margin-top: 60px; color: var(--text-main); }
+        .extras-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 20px; }
+        .extra-box { background: var(--white); padding: 20px; border: var(--border-width) solid var(--border-color); border-radius: var(--radius); box-shadow: 4px 4px 0px var(--border-color); }
+        .extra-box h4 { font-size: 18px; margin-bottom: 10px; border-bottom: 3px solid var(--border-color); padding-bottom: 5px; }
+        .extra-box ul { list-style: none; font-weight: 600; }
+        .extra-box ul li { margin-bottom: 6px; font-size: 15px; }
+        .extra-box ul li::before { content: '👉 '; margin-right: 8px; }
+
+        /* MOOD CARDS & TABLES */
+        .mood-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 60px; }
+        .mood-card { background: var(--white); border: var(--border-width) solid var(--border-color); border-radius: var(--radius); box-shadow: var(--shadow-brutal); overflow: hidden; }
+        .mood-header { padding: 15px; font-size: 18px; font-weight: 700; border-bottom: var(--border-width) solid var(--border-color); text-align: center; text-transform: uppercase; }
+        .mood-card:nth-child(1) .mood-header { background: var(--color-pink); color: var(--white); }
+        .mood-card:nth-child(2) .mood-header { background: var(--color-blue); color: var(--white); }
+        .mood-card:nth-child(3) .mood-header { background: var(--color-yellow); }
+        .mood-card:nth-child(4) .mood-header { background: var(--color-green); }
+        .mood-card ul { padding: 20px; list-style: none; font-weight: 700; }
+        .mood-card ul li { padding: 10px 0; border-bottom: 2px dashed #ddd; font-size: 15px; }
+        .mood-card ul li:last-child { border-bottom: none; }
+        .mood-card ul li::before { content: '⭐ '; margin-right: 10px; }
+
+        .table-wrap { background: var(--white); border: var(--border-width) solid var(--border-color); border-radius: var(--radius); box-shadow: var(--shadow-brutal); overflow-x: auto; margin-bottom: 40px; }
+        table { width: 100%; border-collapse: collapse; font-weight: 600; white-space: nowrap; }
+        th { background: var(--border-color); color: var(--white); font-family: 'Space Grotesk'; padding: 15px; text-transform: uppercase; text-align: left; font-size: 15px; }
+        td { padding: 15px; border-bottom: 2px solid var(--border-color); border-right: 2px solid var(--border-color); font-size: 14px; }
+        td:last-child { border-right: none; }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) { background: #f8f9fa; }
+        tr:hover { background: #ffeaa7; }
+        .badge { background: var(--color-blue); color: var(--white); padding: 4px 10px; border-radius: var(--radius-pill); border: 2px solid var(--border-color); font-weight: 700; }
+        .badge.high { background: var(--color-green); }
+
+        .rec-box { background: var(--white); border: var(--border-width) solid var(--border-color); border-radius: var(--radius); box-shadow: var(--shadow-brutal); padding: 30px; margin-bottom: 40px; }
+        .rec-box h3 { margin-bottom: 20px; font-size: 24px; }
+        .rec-box p { font-weight: 600; font-size: 16px; margin-bottom: 12px; display: flex; align-items: baseline; gap: 10px; }
+        .rec-box p strong { background: var(--border-color); color: var(--color-yellow); padding: 2px 10px; border-radius: 8px; }
 
         /* CADDIE STYLE */
         .caddie-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
@@ -197,15 +237,6 @@
         .btn-counter:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px; }
         .progress-container { background: #e0e0e0; border: 2px solid var(--border-color); height: 20px; border-radius: var(--radius-pill); overflow: hidden; }
         .progress-bar { background: var(--color-green); height: 100%; width: 0%; transition: width 0.3s ease; }
-
-        /* DICE MACHINE */
-        .dice-machine { background: var(--color-purple); border: var(--border-width) solid var(--border-color); border-radius: var(--radius); padding: 40px 20px; box-shadow: var(--shadow-brutal); text-align: center; margin-bottom: 60px; position: relative; }
-        .dice-container { display: flex; align-items: center; justify-content: center; gap: 25px; flex-wrap: wrap; }
-        .dice-cube { width: 90px; height: 90px; background: var(--white); border: 4px solid var(--border-color); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; font-family: 'Space Grotesk'; font-weight: 700; box-shadow: 6px 6px 0px var(--border-color); }
-        .rolling { animation: shake 0.4s infinite; }
-        @keyframes shake { 0% { transform: translate(2px, 1px) rotate(0deg); } 25% { transform: translate(-1px, -2px) rotate(-10deg); } 50% { transform: translate(-3px, 0px) rotate(10deg); } 100% { transform: translate(1px, -1px) rotate(0deg); } }
-        .btn-roll { background: var(--color-yellow); border: var(--border-width) solid var(--border-color); border-radius: var(--radius-pill); padding: 15px 35px; font-size: 20px; font-family: 'Space Grotesk'; font-weight: 700; cursor: pointer; box-shadow: 6px 6px 0px var(--border-color); }
-        .result-box { display: none; background: var(--white); padding: 15px 25px; border: var(--border-width) solid var(--border-color); border-radius: var(--radius-pill); font-size: 18px; font-weight: 700; box-shadow: 4px 4px 0px var(--border-color); animation: slideUp 0.3s ease-out; }
 
         @media (max-width: 768px) {
             nav { width: 92%; justify-content: space-between; padding: 10px 20px; border-radius: 20px; }
@@ -269,6 +300,7 @@
         <section id="repas" class="page-section">
             <h2 class="section-title">Le Menu 🍕</h2>
             <div class="timeline-grid">
+                
                 <div class="day-block">
                     <div class="day-badge">VENDREDI</div>
                     <div class="meals">
@@ -281,23 +313,204 @@
                                 <div class="info-pill">Prép: 10m</div>
                                 <div class="info-pill">Cuisson: 25m</div>
                                 <div class="meal-label">Ingrédients</div>
-                                <div class="meal-content">1 grande conserve de tomates pelées, 1 oignon et demi, 1 ou 2 gousses d’ail, 1 càc de sel, 2 càc de cumin...</div>
+                                <div class="meal-content">1 grande conserve de tomates pelées, 1 oignon et demi, 1 ou 2 gousses d’ail, 1 càc de sel, 2 càc de cumin, 2 càc de curcuma, 1 grande conserve de haricots rouges, riz</div>
+                                <div class="meal-label">Recette</div>
+                                <div class="meal-content">Couper l’oignon en fines lamelles, presser l’ail et faire revenir le tout dans une poêle pendant 10 min avec le sel à feu doux. Ajouter les tomates pelées et les épices, faire mijoter 15 min puis ajouter les haricots rouges. Enlever du feu et déguster avec du riz !</div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="day-block">
+                    <div class="day-badge" style="background: var(--color-blue);">SAMEDI</div>
+                    <div class="meals">
+                        <div class="meal-card">
+                            <div class="meal-header">
+                                <h3>Pâtes pesto, crevettes</h3>
+                                <span class="time-tag midi">MIDI</span>
+                            </div>
+                            <div class="meal-body">
+                                <div class="info-pill">Prép: 10m</div>
+                                <div class="info-pill">Cuisson: 15m</div>
+                                <div class="meal-label">Ingrédients</div>
+                                <div class="meal-content">Ail, crevettes (200-300g épluchées), pesto vert, pâtes, courgette, coriandre (facultatif)</div>
+                                <div class="meal-label">Recette</div>
+                                <div class="meal-content">Faire revenir les crevettes avec l’ail (5-10 min). Ajouter courgettes en lamelles + pesto, mélanger. Cuire les pâtes et mélanger le tout.</div>
+                            </div>
+                        </div>
+                        <div class="meal-card">
+                            <div class="meal-header">
+                                <h3>Pizza Classique</h3>
+                                <span class="time-tag soir">SOIR</span>
+                            </div>
+                            <div class="meal-body">
+                                <div class="info-pill">Prép: 10m</div>
+                                <div class="info-pill">Cuisson: 15m</div>
+                                <div class="meal-label">Ingrédients</div>
+                                <div class="meal-content">Jambon, mozzarella, pâte à pizza (Thermomix), sauce tomapizza, herbes à maman, œuf ?, crème fraîche ?</div>
+                                <div class="meal-label">Recette</div>
+                                <div class="meal-content">Dans la tête 🧠</div>
+                                <div class="post-it">📝 Note : Ça va être génial</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="day-block">
+                    <div class="day-badge" style="background: var(--color-yellow); color: var(--border-color);">DIMANCHE</div>
+                    <div class="meals">
+                        <div class="meal-card">
+                            <div class="meal-header">
+                                <h3>Restes (Pizza)</h3>
+                                <span class="time-tag midi">MIDI</span>
+                            </div>
+                            <div class="meal-body">
+                                <div class="meal-content" style="text-align: center; padding: 20px;">On réchauffe le chef d'œuvre d'hier ! 🍕</div>
+                            </div>
+                        </div>
+                        <div class="meal-card">
+                            <div class="meal-header">
+                                <h3>Lasagnes ratatouille</h3>
+                                <span class="time-tag soir">SOIR</span>
+                            </div>
+                            <div class="meal-body">
+                                <div class="meal-label">Ingrédients</div>
+                                <div class="meal-content">Pâtes à lasagnes, ratatouille, béchamel, mozzarella</div>
+                                <a href="https://jow.fr/recipes/lasagnes-express-a-la-ratatouille-8m5fdtmm9uoi?coversCount=4" target="_blank" class="btn-link"><i class="fa-solid fa-link"></i> Voir sur Jow</a>
+                                <div class="post-it" style="background: #81ecec;">📝 Note : Trop sous-estimé en fait</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="day-block">
+                    <div class="day-badge" style="background: var(--color-green);">LUNDI</div>
+                    <div class="meals">
+                        <div class="meal-card">
+                            <div class="meal-header">
+                                <h3>Riz au curry</h3>
+                                <span class="time-tag midi">MIDI</span>
+                            </div>
+                            <div class="meal-body">
+                                <div class="info-pill">Prép: 10m</div>
+                                <div class="info-pill">Cuisson: 10m</div>
+                                <div class="meal-label">Ingrédients</div>
+                                <div class="meal-content">Riz, filets de poulet, crème fraîche, curry en poudre, oignon, ail, cannelle</div>
+                                <div class="meal-label">Recette</div>
+                                <div class="meal-content">Dans la tête 🧠</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="extras-section">
+                <h3 class="font-display" style="font-size: 32px; color: var(--white); -webkit-text-stroke: 1px var(--border-color); margin-bottom:20px;">Les Extras</h3>
+                <div class="extras-grid">
+                    <div class="extra-box">
+                        <h4>☕ Petit Dej</h4>
+                        <ul>
+                            <li>Brioche & Nutella</li>
+                            <li>Beurre & Cracottes</li>
+                            <li>Jus d'orange</li>
+                        </ul>
+                    </div>
+                    <div class="extra-box">
+                        <h4>🍪 Goûters</h4>
+                        <ul>
+                            <li>Fringales devant les épisodes</li>
+                        </ul>
+                    </div>
+                    <div class="extra-box">
+                        <h4>🍹 Apéro</h4>
+                        <ul>
+                            <li>Monster Munch / Belin</li>
+                            <li>Mojito Virgin / Sodas</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </section>
 
         <section id="anime" class="page-section">
-            <h2 class="section-title anime-title">L'Antre Otaku 📺</h2>
+            <div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 40px;">
+                <h2 class="section-title anime-title" style="margin: 0;">L'Antre Otaku 📺</h2>
+                <a href="https://www.crunchyroll.com/fr/discover" target="_blank" class="btn-link" style="background: #F47521; font-size: 18px; margin-top:0;">▶️ Go Crunchyroll</a>
+            </div>
+
             <div class="dice-machine">
-                <h3 class="font-display" style="color:white; margin-bottom:15px;">Sélection Ultra Rapide</h3>
+                <h3 class="font-display" style="color: white; margin-bottom: 10px;">Sélection Ultra Rapide</h3>
+                <p style="color: white; font-weight: 700; margin-bottom: 30px;">Tire au sort une série de ta liste d'un seul clic !</p>
                 <div class="dice-container">
                     <div class="dice-cube" id="dice">?</div>
                     <button class="btn-roll" onclick="rollDice()">Tirer au sort !</button>
                     <div class="result-box" id="dice-result"><span id="anime-chosen" style="color: var(--color-pink);"></span></div>
                 </div>
+            </div>
+
+            <div class="rec-box">
+                <h3 class="font-display">🔥 Incontournables</h3>
+                <p><strong>Witch Hat Atelier</strong> Fantasy magique</p>
+                <p><strong>Les Carnets de l’Apothicaire</strong> Histoire intelligente / addictive</p>
+                <p><strong>Assassination Classroom</strong> Anime marquant</p>
+                <p><strong>Shangri-La Frontier</strong> Fun immédiat sans temps mort</p>
+            </div>
+
+            <div class="mood-grid">
+                <div class="mood-card">
+                    <div class="mood-header">Fantasy 🪄</div>
+                    <ul>
+                        <li>Witch Hat Atelier</li>
+                        <li>Yona of the Dawn</li>
+                        <li>Overlord</li>
+                    </ul>
+                </div>
+                <div class="mood-card">
+                    <div class="mood-header">Émotion 💧</div>
+                    <ul>
+                        <li>Assassination Classroom</li>
+                        <li>One Piece</li>
+                        <li>Studio Ghibli</li>
+                    </ul>
+                </div>
+                <div class="mood-card">
+                    <div class="mood-header">Hype ⚡</div>
+                    <ul>
+                        <li>Solo Leveling</li>
+                        <li>Jujutsu Kaisen</li>
+                        <li>Shangri-La Frontier</li>
+                    </ul>
+                </div>
+                <div class="mood-card">
+                    <div class="mood-header">Cozy 🍃</div>
+                    <ul>
+                        <li>Spy × Family</li>
+                        <li>Tueuse de slime 300 ans</li>
+                        <li>Les Carnets de l'Apothicaire</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Anime</th>
+                            <th>Action</th>
+                            <th>Émotion</th>
+                            <th>Humour</th>
+                            <th>Univers</th>
+                            <th>Taille</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Witch Hat Atelier</td><td><span class="badge">7</span></td><td><span class="badge">8</span></td><td><span class="badge">6</span></td><td><span class="badge high">10</span></td><td>Moyen</td></tr>
+                        <tr><td>Les Carnets de l’Apothicaire</td><td><span class="badge">5</span></td><td><span class="badge">8</span></td><td><span class="badge">7</span></td><td><span class="badge">9</span></td><td>Moyen</td></tr>
+                        <tr><td>One Piece</td><td><span class="badge">9</span></td><td><span class="badge high">10</span></td><td><span class="badge">9</span></td><td><span class="badge high">10</span></td><td>TRÈS long</td></tr>
+                        <tr><td>Jujutsu Kaisen</td><td><span class="badge high">10</span></td><td><span class="badge">8</span></td><td><span class="badge">7</span></td><td><span class="badge">8</span></td><td>Moyen</td></tr>
+                    </tbody>
+                </table>
             </div>
         </section>
 
@@ -333,29 +546,52 @@
     </div>
 
     <script>
-        // --- BASE DE DONNÉES LOCALE INITIALE (SI LOCALSTORAGE VIDE) ---
+        // --- BASE DE DONNÉES LOCALE COMPLÈTE (AVEC TOUS TES ÉLÉMENTS D'ORIGINE) ---
         const defaultCourses = [
             { id: 1, categorie: '🥩 Crèmerie & Frais', item_name: 'Filets de poulet', est_achete: false },
             { id: 2, categorie: '🥩 Crèmerie & Frais', item_name: 'Crevettes (200-300g)', est_achete: false },
             { id: 3, categorie: '🥩 Crèmerie & Frais', item_name: 'Jambon blanc', est_achete: false },
             { id: 4, categorie: '🥩 Crèmerie & Frais', item_name: 'Mozzarella (x3)', est_achete: false },
-            { id: 5, categorie: '🍝 Épicerie Sec', item_name: 'Riz', est_achete: false },
-            { id: 6, categorie: '🍝 Épicerie Sec', item_name: 'Pâtes', est_achete: false },
-            { id: 7, categorie: '🍝 Épicerie Sec', item_name: 'Pesto vert', est_achete: false },
-            { id: 8, categorie: '🥦 Fruits & Légumes', item_name: 'Oignons (x2)', est_achete: false },
-            { id: 9, categorie: '🥦 Fruits & Légumes', item_name: 'Ail (1 tête)', est_achete: false },
-            { id: 10, categorie: '🍿 Snacks & Boissons', item_name: 'Brioche & Nutella', est_achete: false }
+            { id: 5, categorie: '🥩 Crèmerie & Frais', item_name: 'Béchamel', est_achete: false },
+            { id: 6, categorie: '🥩 Crèmerie & Frais', item_name: 'Crème fraîche', est_achete: false },
+            { id: 7, categorie: '🥩 Crèmerie & Frais', item_name: 'Beurre', est_achete: false },
+            
+            { id: 8, categorie: '🍝 Épicerie Sec', item_name: 'Riz', est_achete: false },
+            { id: 9, categorie: '🍝 Épicerie Sec', item_name: 'Pâtes', est_achete: false },
+            { id: 10, categorie: '🍝 Épicerie Sec', item_name: 'Pâtes à lasagnes', est_achete: false },
+            { id: 11, categorie: '🍝 Épicerie Sec', item_name: 'Conserve Tomates pelées', est_achete: false },
+            { id: 12, categorie: '🍝 Épicerie Sec', item_name: 'Conserve Haricots rouges', est_achete: false },
+            { id: 13, categorie: '🍝 Épicerie Sec', item_name: 'Pesto vert', est_achete: false },
+            { id: 14, categorie: '🍝 Épicerie Sec', item_name: 'Sauce Tomapizza', est_achete: false },
+            { id: 15, categorie: '🍝 Épicerie Sec', item_name: 'Épices (Curry, Cumin, Curcuma, Cannelle)', est_achete: false },
+            
+            { id: 16, categorie: '🥦 Fruits & Légumes', item_name: 'Oignons (x2)', est_achete: false },
+            { id: 17, categorie: '🥦 Fruits & Légumes', item_name: 'Ail (1 tête)', est_achete: false },
+            { id: 18, categorie: '🥦 Fruits & Légumes', item_name: 'Courgettes', est_achete: false },
+            { id: 19, categorie: '🥦 Fruits & Légumes', item_name: 'Coriandre (facultatif)', est_achete: false },
+            
+            { id: 20, categorie: '🍿 Snacks & Boissons', item_name: 'Brioche & Nutella', est_achete: false },
+            { id: 21, categorie: '🍿 Snacks & Boissons', item_name: 'Cracottes', est_achete: false },
+            { id: 22, categorie: '🍿 Snacks & Boissons', item_name: 'Jus d\'orange', est_achete: false },
+            { id: 23, categorie: '🍿 Snacks & Boissons', item_name: 'Monster Munch / Belin', est_achete: false },
+            { id: 24, categorie: '🍿 Snacks & Boissons', item_name: 'Sodas / Ingrédients Mojito', est_achete: false }
         ];
 
         const defaultWatchlist = [
             { slug: 'witch', titre: 'Witch Hat Atelier', nb_episodes_vus: 0, max_episodes: 12 },
             { slug: 'apo', titre: 'Les Carnets de l’Apothicaire', nb_episodes_vus: 0, max_episodes: 24 },
             { slug: 'jjk', titre: 'Jujutsu Kaisen', nb_episodes_vus: 0, max_episodes: 24 },
-            { slug: 'shangri', 'titre': 'Shangri-La Frontier', nb_episodes_vus: 0, max_episodes: 25 },
-            { slug: 'yona', 'titre': 'Yona of the Dawn', nb_episodes_vus: 0, max_episodes: 24 }
+            { slug: 'shangri', titre: 'Shangri-La Frontier', nb_episodes_vus: 0, max_episodes: 25 },
+            { slug: 'yona', titre: 'Yona of the Dawn', nb_episodes_vus: 0, max_episodes: 24 },
+            { slug: 'overlord', titre: 'Overlord', nb_episodes_vus: 0, max_episodes: 13 },
+            { slug: 'assassination', titre: 'Assassination Classroom', nb_episodes_vus: 0, max_episodes: 22 },
+            { slug: 'onepiece', titre: 'One Piece', nb_episodes_vus: 0, max_episodes: 1120 },
+            { slug: 'ghibli', titre: 'Studio Ghibli (Films)', nb_episodes_vus: 0, max_episodes: 23 },
+            { slug: 'sololeveling', titre: 'Solo Leveling', nb_episodes_vus: 0, max_episodes: 12 },
+            { slug: 'spyfamily', titre: 'Spy × Family', nb_episodes_vus: 0, max_episodes: 25 },
+            { slug: 'slime', titre: 'Tueuse de slime 300 ans', nb_episodes_vus: 0, max_episodes: 12 }
         ];
 
-        // Chargement initial des données
         let courses = JSON.parse(localStorage.getItem('courses_db')) || defaultCourses;
         let watchlist = JSON.parse(localStorage.getItem('watchlist_db')) || defaultWatchlist;
 
@@ -396,14 +632,12 @@
             const container = document.getElementById('caddie-container');
             container.innerHTML = '';
 
-            // Grouper les articles par catégorie
             const grouped = {};
             courses.forEach(item => {
                 if (!grouped[item.categorie]) grouped[item.categorie] = [];
                 grouped[item.categorie].push(item);
             });
 
-            // Générer les cartes HTML
             Object.keys(grouped).forEach(category => {
                 let cardHTML = `
                     <div class="caddie-card">
@@ -447,7 +681,6 @@
             const catName = input.value.trim();
             if(!catName) return;
 
-            // Créer la catégorie avec un premier élément bidon ou vide
             courses.push({
                 id: Date.now(),
                 categorie: catName,
@@ -490,7 +723,7 @@
         }
 
         function deleteCategory(category) {
-            if(confirm("Supprimer tout le rayon ?")) {
+            if(confirm("Supprimer tout le rayon et ses articles ?")) {
                 courses = courses.filter(c => c.categorie !== category);
                 saveDB();
                 renderCaddie();
@@ -559,14 +792,14 @@
         }
 
         function deleteAnime(slug) {
-            if(confirm("Retirer cet anime de la liste ?")) {
+            if(confirm("Retirer cet anime du tracker ?")) {
                 watchlist = watchlist.filter(a => a.slug !== slug);
                 saveDB();
                 renderWatchlist();
             }
         }
 
-        // --- MACHINE A DE (DYNAMIQUE SUR LA WATCHLIST) ---
+        // --- RANDOM DICE MACHINE ---
         function rollDice() {
             const dice = document.getElementById('dice');
             const resultBox = document.getElementById('dice-result');
@@ -580,7 +813,7 @@
                 dice.classList.remove('rolling');
                 if (watchlist.length === 0) {
                     dice.innerText = 'X';
-                    animeChosen.innerText = "Aucun anime dans ta Watchlist !";
+                    animeChosen.innerText = "Aucun anime disponible !";
                 } else {
                     const randomIndex = Math.floor(Math.random() * watchlist.length);
                     dice.innerText = randomIndex + 1;
