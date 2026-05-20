@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notre Paradis - V4.1 Full Content Edition</title>
+    <title>Notre Paradis - V4.2 Final Edition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=DM+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -218,6 +218,25 @@
         .rec-box p { font-weight: 600; font-size: 16px; margin-bottom: 12px; display: flex; align-items: baseline; gap: 10px; }
         .rec-box p strong { background: var(--border-color); color: var(--color-yellow); padding: 2px 10px; border-radius: 8px; }
 
+        /* BINGO / DICE MACHINE (RESTORED CSS) */
+        .dice-machine { background: var(--color-purple); border: var(--border-width) solid var(--border-color); border-radius: var(--radius); padding: 40px 20px; box-shadow: var(--shadow-brutal); text-align: center; margin-bottom: 60px; position: relative; overflow: hidden; }
+        .dice-machine::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 10px; background: repeating-linear-gradient(45deg, var(--color-yellow), var(--color-yellow) 20px, var(--border-color) 20px, var(--border-color) 40px); border-bottom: var(--border-width) solid var(--border-color); }
+        .dice-machine h3 { font-size: clamp(1.4rem, 4vw, 1.8rem); color: var(--white); margin-bottom: 10px; -webkit-text-stroke: 1px var(--border-color); }
+        .dice-machine p { color: var(--white); font-weight: 700; margin-bottom: 30px; font-size: 15px; }
+        .dice-container { display: flex; align-items: center; justify-content: center; gap: 25px; flex-wrap: wrap; }
+        .dice-cube { width: 90px; height: 90px; background: var(--white); border: 4px solid var(--border-color); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; font-family: 'Space Grotesk'; font-weight: 700; box-shadow: 6px 6px 0px var(--border-color); flex-shrink: 0; }
+        
+        .rolling { animation: shake 0.4s infinite; }
+        @keyframes shake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            25% { transform: translate(-1px, -2px) rotate(-10deg); }
+            50% { transform: translate(-3px, 0px) rotate(10deg); }
+            75% { transform: translate(3px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -1px) rotate(0deg); }
+        }
+        .btn-roll { background: var(--color-yellow); color: var(--border-color); border: var(--border-width) solid var(--border-color); border-radius: var(--radius-pill); padding: 15px 35px; font-size: 20px; font-family: 'Space Grotesk'; font-weight: 700; cursor: pointer; box-shadow: 6px 6px 0px var(--border-color); max-width: 100%; }
+        .result-box { display: none; background: var(--white); padding: 15px 25px; border: var(--border-width) solid var(--border-color); border-radius: var(--radius-pill); font-size: 18px; font-weight: 700; box-shadow: 4px 4px 0px var(--border-color); animation: slideUp 0.3s ease-out; width: 100%; max-width: 400px; word-break: break-word; }
+
         /* CADDIE STYLE */
         .caddie-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
         .caddie-card { background: var(--white); border: var(--border-width) solid var(--border-color); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-brutal); display: flex; flex-direction: column; }
@@ -315,7 +334,7 @@
                                 <div class="meal-label">Ingrédients</div>
                                 <div class="meal-content">1 grande conserve de tomates pelées, 1 oignon et demi, 1 ou 2 gousses d’ail, 1 càc de sel, 2 càc de cumin, 2 càc de curcuma, 1 grande conserve de haricots rouges, riz</div>
                                 <div class="meal-label">Recette</div>
-                                <div class="meal-content">Couper l’oignon en fines lamelles, presser l’ail et faire revenir le tout dans une poêle pendant 10 min avec le sel à feu doux. Ajouter les tomates pelées et les épices, faire mijoter 15 min puis ajouter les haricots rouges. Enlever du feu et déguster avec du riz !</div>
+                                <div class="meal-content">Couper l’oignon en fines lamelles, presser l’ail et faire revenir le tout dans une poêle pendant 10 min avec le sel à feu doux. Ajouter les tomates pelées and les épices, faire mijoter 15 min puis ajouter les haricots rouges. Enlever du feu et déguster avec du riz !</div>
                             </div>
                         </div>
                     </div>
@@ -440,8 +459,8 @@
             </div>
 
             <div class="dice-machine">
-                <h3 class="font-display" style="color: white; margin-bottom: 10px;">Sélection Ultra Rapide</h3>
-                <p style="color: white; font-weight: 700; margin-bottom: 30px;">Tire au sort une série de ta liste d'un seul clic !</p>
+                <h3 class="font-display">Sélection Ultra Rapide</h3>
+                <p>Tire au sort une série de ta liste d'un seul clic !</p>
                 <div class="dice-container">
                     <div class="dice-cube" id="dice">?</div>
                     <button class="btn-roll" onclick="rollDice()">Tirer au sort !</button>
@@ -546,7 +565,6 @@
     </div>
 
     <script>
-        // --- BASE DE DONNÉES LOCALE COMPLÈTE (AVEC TOUS TES ÉLÉMENTS D'ORIGINE) ---
         const defaultCourses = [
             { id: 1, categorie: '🥩 Crèmerie & Frais', item_name: 'Filets de poulet', est_achete: false },
             { id: 2, categorie: '🥩 Crèmerie & Frais', item_name: 'Crevettes (200-300g)', est_achete: false },
@@ -600,7 +618,7 @@
             localStorage.setItem('watchlist_db', JSON.stringify(watchlist));
         }
 
-        // --- NAVIGATION CONTROLLER ---
+        // --- NAVIGATION ---
         function toggleMenu() {
             document.getElementById('burger-btn').classList.toggle('open');
             document.getElementById('menu-links').classList.toggle('open');
@@ -627,7 +645,7 @@
             renderWatchlist();
         });
 
-        // --- CADDIE ENGINE ---
+        // --- CADDIE ---
         function renderCaddie() {
             const container = document.getElementById('caddie-container');
             container.innerHTML = '';
@@ -730,7 +748,7 @@
             }
         }
 
-        // --- WATCHLIST ENGINE ---
+        // --- WATCHLIST ---
         function renderWatchlist() {
             const container = document.getElementById('watchlist-container');
             container.innerHTML = '';
@@ -799,7 +817,7 @@
             }
         }
 
-        // --- RANDOM DICE MACHINE ---
+        // --- BINGO / DICE MACHINE ---
         function rollDice() {
             const dice = document.getElementById('dice');
             const resultBox = document.getElementById('dice-result');
