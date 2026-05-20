@@ -257,7 +257,7 @@
         .progress-container { background: #e0e0e0; border: 2px solid var(--border-color); height: 20px; border-radius: var(--radius-pill); overflow: hidden; }
         .progress-bar { background: var(--color-green); height: 100%; width: 0%; transition: width 0.3s ease; }
 
-        /* WIDGET CLOUD RETRACTABLE FIABLE (PC & MOBILE) */
+        /* WIDGET CLOUD RETRACTABLE FIABLE FIXXÉ EN BAS (PC & MOBILE) */
         #sync-status-widget {
             position: fixed; bottom: 20px; right: 20px; background: var(--white); 
             border: var(--border-width) solid var(--border-color); padding: 8px 15px; 
@@ -630,9 +630,8 @@
     </div>
 
     <script>
-        // --- ☁️ CONFIGURATION CLOUD RE-STABILISÉE (NPOINT) ---
-        // Colle à nouveau ton NOUVEL ID créé sur npoint.io entre les guillemets ci-dessous.
-        const NPOINT_BIN_ID = "77ed71b116d350fb39cc"; 
+        // --- ☁️ CONFIGURATION CLOUD RE-STABILISÉE ET ANTI-429 (NPOINT) ---
+        const NPOINT_BIN_ID = "METS_TON_ID_NPOINT_ICI"; 
 
         const defaultCourses = [
             { id: 1, categorie: '🥩 Crèmerie & Frais', item_name: 'Filets de poulet', est_achete: false },
@@ -706,81 +705,93 @@
             }
         }
 
-        // --- PIPELINE DE SAUVEGARDE INTEGRÉE (LOCAL + CLOUD DEBOUNCED VIA PUT) ---
+        // --- PIPELINE DE SAUVEGARDE AMÉLIORÉE AVEC RETRY EN CAS DE 429 ---
         function saveDB() {
             localStorage.setItem('courses_db', JSON.stringify(appData.courses));
             localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
             localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
 
-            if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "TON_NOUVEAU_NPOINT_ID") {
+            if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "METS_TON_ID_NPOINT_ICI") {
                 updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
                 return;
             }
 
-            updateSyncWidget("⏳", "En attente...", "var(--color-yellow)", false);
+            updateSyncWidget("⏳", "Modifications enregistrées...", "var(--color-yellow)", false);
 
+            // Debounce rallongé à 2 secondes pour fusionner les clics rapides
             clearTimeout(cloudSaveTimeout);
-            cloudSaveTimeout = setTimeout(async () => {
-                updateSyncWidget("⏳", "Envoi Cloud...", "var(--color-yellow)", false);
+            cloudSaveTimeout = setTimeout(async function runSave() {
+                updateSyncWidget("⏳", "Synchronisation...", "var(--color-yellow)", false);
                 try {
                     const response = await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(appData)
                     });
+
+                    // BLINDAGE CONTRE L'ERREUR 429 (AUTO-GUÉRISSON)
+                    if (response.status === 429) {
+                        updateSyncWidget("⏳", "Serveur surchargé, réessai dans 4s...", "var(--color-yellow)", false);
+                        setTimeout(runSave, 4000); // Relance automatiquement après 4 secondes
+                        return;
+                    }
+
                     if (response.ok) {
                         updateSyncWidget("☁️", "Synchronisé", "var(--color-green)", true);
                     } else {
-                        updateSyncWidget("❌", "Erreur Cloud", "var(--color-pink)", false);
+                        updateSyncWidget("❌", `Erreur Cloud (${response.status})`, "var(--color-pink)", false);
                     }
                 } catch (err) {
-                    updateSyncWidget("❌", `Erreur : ${err.message}`, "var(--color-pink)", false);
+                    updateSyncWidget("❌", "Problème réseau", "var(--color-pink)", false);
                 }
-            }, 1000);
+            }, 2000);
         }
 
-        // --- CHARGEMENT DU CLOUD ---
+        // --- CHARGEMENT SÉCURISÉ DU CLOUD ---
         async function loadDB() {
-            if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "TON_NOUVEAU_NPOINT_ID") {
+            if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "METS_TON_ID_NPOINT_ICI") {
                 updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
                 return;
             }
 
-            updateSyncWidget("⏳", "Vérification...", "var(--color-yellow)", false);
+            updateSyncWidget("⏳", "Récupération...", "var(--color-yellow)", false);
             try {
                 const response = await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`);
                 
-                if (!response.ok) {
-                    updateSyncWidget("❌", `Erreur : ${response.status}`, "var(--color-pink)", false);
+                if (response.status === 429) {
+                    updateSyncWidget("⏳", "Vérification bloquée, réessai...", "var(--color-yellow)", false);
+                    setTimeout(loadDB, 4000);
                     return;
                 }
 
-                const responseText = await response.text();
-                
-                // Si le cloud est vide : on l'initialise proprement sans faire crasher
-                if (!responseText || responseText.trim() === "" || responseText.trim() === "{}") {
-                    updateSyncWidget("⏳", "Initialisation...", "var(--color-yellow)", false);
-                    await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(appData)
-                    });
-                    updateSyncWidget("☁️", "Initialisé", "var(--color-green)", true);
-                    return;
-                }
+                if (response.ok) {
+                    const responseText = await response.text();
+                    
+                    // Si le cloud vient d'être créé ({}) on le remplit proprement
+                    if (!responseText || responseText.trim() === "" || responseText.trim() === "{}") {
+                        updateSyncWidget("⏳", "Initialisation...", "var(--color-yellow)", false);
+                        await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(appData)
+                        });
+                        updateSyncWidget("☁️", "Prêt", "var(--color-green)", true);
+                        return;
+                    }
 
-                const onlineData = JSON.parse(responseText);
-
-                if (onlineData && onlineData.courses && onlineData.watchlist && onlineData.animeStats) {
-                    appData = onlineData;
-                    localStorage.setItem('courses_db', JSON.stringify(appData.courses));
-                    localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
-                    localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
-                    updateSyncWidget("☁️", "À jour", "var(--color-green)", true);
+                    const onlineData = JSON.parse(responseText);
+                    if (onlineData && onlineData.courses && onlineData.watchlist && onlineData.animeStats) {
+                        appData = onlineData;
+                        localStorage.setItem('courses_db', JSON.stringify(appData.courses));
+                        localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
+                        localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
+                        updateSyncWidget("☁️", "À jour", "var(--color-green)", true);
+                    }
+                } else {
+                    updateSyncWidget("❌", `Erreur (${response.status})`, "var(--color-pink)", false);
                 }
             } catch (err) {
-                console.error(err);
-                updateSyncWidget("❌", `Erreur : ${err.message}`, "var(--color-pink)", false);
+                updateSyncWidget("❌", "Mode local actif", "var(--color-pink)", false);
             }
         }
 
@@ -804,7 +815,7 @@
             localStorage.setItem('active_tab_weekend', tabId);
         }
 
-        // --- INITIALISATION ---
+        // --- INITIALISATION INSTANTANÉE ---
         window.addEventListener('DOMContentLoaded', () => {
             const activeTab = localStorage.getItem('active_tab_weekend') || 'home';
             switchTab(activeTab);
@@ -820,7 +831,7 @@
             });
         });
 
-        // --- UNIVER ANIME ---
+        // --- UNIVERS ANIME ---
         function renderAnimeStatsTable() {
             const tbody = document.getElementById('anime-table-body');
             if (!tbody) return;
