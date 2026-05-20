@@ -258,7 +258,8 @@
         .progress-bar { background: var(--color-green); height: 100%; width: 0%; transition: width 0.3s ease; }
 
         @media (max-width: 768px) {
-            nav { width: 92%; justify-content: space-between; padding: 10px 20px; border-radius: 20px; }
+            nav { width: 92%; justify-content: space-between; padding: 10px 20px; border-radius: 20px; flex-wrap: wrap; }
+            .hamburger-menu { display: flex; }
             .nav-links { display: none; flex-direction: column; width: 100%; gap: 8px; padding-top: 12px; }
             .nav-links.open { display: flex; }
             .meals, .watchlist-grid, .caddie-grid, .home-grid { grid-template-columns: 1fr; }
