@@ -1,130 +1,10 @@
-<?php
-// --- CONFIGURATION DE LA BASE DE DONNÉES ---
-$host = 'localhost';
-$db   = 'gestion_perso';
-$user = 'root';
-$pass = ''; // Mets 'root' si tu es sur Mac/MAMP
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
-
-try {
-     $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (\PDOException $e) {
-     die("Erreur de connexion à la base de données : " . $e->getMessage());
-}
-
-// --- TRAITEMENT DES REQUÊTES (AJAX & FORMULAIRES) ---
-if (isset($_GET['action'])) {
-    
-    // [AJAX] Sauvegarde progression Watchlist
-    if ($_GET['action'] === 'update_anime') {
-        header('Content-Type: application/json');
-        $slug = $_POST['slug'] ?? '';
-        $ep = intval($_POST['ep'] ?? 0);
-        $stmt = $pdo->prepare("UPDATE watchlist SET nb_episodes_vus = ? WHERE slug = ?");
-        $stmt->execute([$ep, $slug]);
-        echo json_encode(['success' => true]);
-        exit;
-    }
-    
-    // [AJAX] Cocher/Décocher Caddie
-    if ($_GET['action'] === 'update_caddie') {
-        header('Content-Type: application/json');
-        $id = intval($_POST['id'] ?? 0);
-        $checked = intval($_POST['checked'] ?? 0);
-        $stmt = $pdo->prepare("UPDATE courses SET est_achete = ? WHERE id = ?");
-        $stmt->execute([$checked, $id]);
-        echo json_encode(['success' => true]);
-        exit;
-    }
-
-    // [POST] Ajouter une nouvelle liste/catégorie de courses
-    if ($_GET['action'] === 'add_caddie_category') {
-        $cat = trim($_POST['new_category'] ?? '');
-        $item = trim($_POST['item_name'] ?? '');
-        if (!empty($cat)) {
-            $stmt = $pdo->prepare("INSERT INTO courses (categorie, item_name, est_achete) VALUES (?, ?, 0)");
-            $stmt->execute([$cat, !empty($item) ? $item : 'Exemple d\'article']);
-        }
-        header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
-        exit;
-    }
-
-    // [POST] Ajouter un article dans une liste existante
-    if ($_GET['action'] === 'add_caddie_item') {
-        $cat = trim($_POST['categorie'] ?? '');
-        $item = trim($_POST['item_name'] ?? '');
-        if (!empty($cat) && !empty($item)) {
-            $stmt = $pdo->prepare("INSERT INTO courses (categorie, item_name, est_achete) VALUES (?, ?, 0)");
-            $stmt->execute([$cat, $item]);
-        }
-        header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
-        exit;
-    }
-
-    // [GET] Supprimer un article spécifique du caddie
-    if ($_GET['action'] === 'delete_caddie_item') {
-        $id = intval($_GET['id'] ?? 0);
-        $stmt = $pdo->prepare("DELETE FROM courses WHERE id = ?");
-        $stmt->execute([$id]);
-        header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
-        exit;
-    }
-
-    // [GET] Supprimer tout un rayon / une liste complète
-    if ($_GET['action'] === 'delete_caddie_category') {
-        $cat = urldecode($_GET['categorie'] ?? '');
-        $stmt = $pdo->prepare("DELETE FROM courses WHERE categorie = ?");
-        $stmt->execute([$cat]);
-        header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
-        exit;
-    }
-
-    // [POST] Ajouter un anime à la Watchlist
-    if ($_GET['action'] === 'add_anime') {
-        $titre = trim($_POST['titre'] ?? '');
-        $max = intval($_POST['max_episodes'] ?? 12);
-        if (!empty($titre)) {
-            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $titre)));
-            $stmt = $pdo->prepare("INSERT INTO watchlist (slug, titre, nb_episodes_vus, max_episodes) VALUES (?, ?, 0, ?) ON DUPLICATE KEY UPDATE max_episodes = ?");
-            $stmt->execute([$slug, $titre, $max, $max]);
-        }
-        header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
-        exit;
-    }
-
-    // [GET] Supprimer un anime de la Watchlist
-    if ($_GET['action'] === 'delete_anime') {
-        $slug = $_GET['slug'] ?? '';
-        $stmt = $pdo->prepare("DELETE FROM watchlist WHERE slug = ?");
-        $stmt->execute([$slug]);
-        header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
-        exit;
-    }
-}
-
-// --- RÉCUPÉRATION DES DONNÉES EN BD ---
-$watchlist_data = $pdo->query("SELECT * FROM watchlist")->fetchAll();
-
-$caddie_raw = $pdo->query("SELECT * FROM courses ORDER BY id ASC")->fetchAll();
-$caddie_grouped = [];
-foreach ($caddie_raw as $row) {
-    $caddie_grouped[$row['categorie']][] = $row;
-}
-?>
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notre Paradis - V3.5 Dynamic</title>
+    <title>Notre Paradis - V4.0 GitHub Edition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=DM+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -179,7 +59,6 @@ foreach ($caddie_raw as $row) {
         h1, h2, h3, h4, .font-display { font-family: 'Space Grotesk', sans-serif; font-weight: 700; }
         a { text-decoration: none; color: inherit; }
 
-        /* REUSABLE BRUTALIST INPUTS & BUTTONS */
         .brutal-input {
             padding: 10px 15px;
             border: var(--border-width) solid var(--border-color);
@@ -221,9 +100,7 @@ foreach ($caddie_raw as $row) {
             transition: 0.1s;
         }
         .delete-btn:hover { background: #ff4770; transform: translate(-1px, -1px); box-shadow: 3px 3px 0px var(--border-color); }
-        .delete-btn:active { transform: translate(1px, 1px); box-shadow: 0px 0px 0px; }
 
-        /* NAVIGATION FLOTTANTE */
         nav {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             background: var(--white); border: var(--border-width) solid var(--border-color);
@@ -250,7 +127,6 @@ foreach ($caddie_raw as $row) {
         }
         .hamburger-menu span { display: block; width: 22px; height: 3px; background: var(--text-main); border-radius: 2px; }
 
-        /* CONTENEUR PRINCIPAL */
         .container { max-width: 1200px; margin: 120px auto 60px; padding: 0 20px; }
         .page-section { display: none; animation: slideUp 0.4s ease-out forwards; opacity: 0; transform: translateY(20px); }
         .page-section.active { display: block; }
@@ -262,7 +138,6 @@ foreach ($caddie_raw as $row) {
             border-radius: var(--radius); padding: 30px; box-shadow: var(--shadow-brutal); position: relative;
         }
 
-        /* ACCUEIL HERO */
         .hero { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 150px; position: relative; }
         .hero h1 { font-size: clamp(1.8rem, 5.5vw, 3.5rem); padding: 12px 30px; margin: 6px 0; color: var(--white); line-height: 1.2; }
         .home-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; margin-top: 50px; }
@@ -302,17 +177,8 @@ foreach ($caddie_raw as $row) {
         .info-pill { display: inline-flex; background: #f1f2f6; padding: 6px 12px; border-radius: var(--radius-pill); font-weight: 700; font-size: 13px; border: 2px solid var(--border-color); margin-right: 8px; margin-bottom: 12px; }
         .meal-label { font-family: 'Space Grotesk'; font-size: 16px; font-weight: 700; color: var(--color-pink); margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; }
         .meal-content { font-size: 14px; font-weight: 600; background: #fdfdfd; padding: 12px; border: 2px dashed var(--border-color); border-radius: 8px; white-space: pre-line; margin-bottom: 15px; }
-        .post-it { background: var(--color-yellow); padding: 15px; border: var(--border-width) solid var(--border-color); border-radius: 0 15px 15px 15px; margin-top: 15px; font-weight: 700; transform: rotate(-1deg); box-shadow: 3px 3px 0px var(--border-color); }
-        .btn-link { display: inline-block; background: var(--color-purple); color: var(--white); font-family: 'Space Grotesk'; font-weight: 700; padding: 10px 20px; border: var(--border-width) solid var(--border-color); border-radius: var(--radius-pill); margin-top: 15px; box-shadow: 4px 4px 0px var(--border-color); transition: var(--transition); }
-        .btn-link:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--border-color); }
 
-        .extras-section { background: var(--color-green); padding: 40px; border: var(--border-width) solid var(--border-color); border-radius: var(--radius); box-shadow: var(--shadow-brutal); margin-top: 60px; }
-        .extras-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 20px; }
-        .extra-box { background: var(--white); padding: 20px; border: var(--border-width) solid var(--border-color); border-radius: var(--radius); box-shadow: 4px 4px 0px var(--border-color); }
-        .extra-box ul { list-style: none; font-weight: 600; }
-        .extra-box ul li::before { content: '👉 '; }
-
-        /* CADDIE CRÉATION & GRID */
+        /* CADDIE STYLE */
         .caddie-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
         .caddie-card { background: var(--white); border: var(--border-width) solid var(--border-color); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-brutal); display: flex; flex-direction: column; }
         .caddie-header { background: var(--text-main); color: var(--white); padding: 15px 20px; font-size: 18px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
@@ -321,7 +187,7 @@ foreach ($caddie_raw as $row) {
         .check-item input { width: 20px; height: 20px; accent-color: var(--color-pink); cursor: pointer; border: 2px solid var(--border-color); margin-top: 2px; }
         .check-item.checked span { text-decoration: line-through; opacity: 0.4; }
 
-        /* WATCHLIST CRÉATION & GRID */
+        /* WATCHLIST STYLE */
         .watchlist-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
         .tracker-card { background: var(--white); border: var(--border-width) solid var(--border-color); border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow-brutal); display: flex; flex-direction: column; gap: 15px; }
         .tracker-card h3 { font-size: 20px; border-bottom: 3px solid var(--border-color); padding-bottom: 8px; }
@@ -395,7 +261,7 @@ foreach ($caddie_raw as $row) {
                 <div class="brutal-card nav-card watchlist" onclick="switchTab('watchlist')">
                     <i class="fa-solid fa-circle-play"></i>
                     <h2>Watchlist</h2>
-                    <p>Tracker de binge-watching interactif dynamique.</p>
+                    <p>Tracker de binge-watching interactif sans serveur.</p>
                 </div>
             </div>
         </section>
@@ -438,94 +304,67 @@ foreach ($caddie_raw as $row) {
         <section id="caddie" class="page-section">
             <h2 class="section-title caddie-title">Le Caddie 🛒</h2>
             
-            <div class="brutal-card" style="margin-bottom: 40px; background: #fff;">
+            <div class="brutal-card" style="margin-bottom: 40px;">
                 <h3 class="font-display" style="margin-bottom: 15px; font-size: 20px;">📦 Créer un nouveau Rayon / Liste</h3>
-                <form method="POST" action="?action=add_caddie_category" style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <input type="text" name="new_category" placeholder="Nom du rayon (ex: 🍇 Fruits, 🥤 Boissons)..." required class="brutal-input" style="flex: 1; min-width: 250px;">
-                    <input type="text" name="item_name" placeholder="Premier article (optionnel)..." class="brutal-input" style="flex: 1; min-width: 200px;">
-                    <button type="submit" class="brutal-btn-small" style="background: var(--color-green); padding: 10px 20px;">Créer la liste</button>
-                </form>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <input type="text" id="new-cat-name" placeholder="Nom du rayon (ex: 🍇 Fruits)..." class="brutal-input" style="flex: 1; min-width: 250px;">
+                    <button onclick="addCaddieCategory()" class="brutal-btn-small" style="background: var(--color-green); padding: 10px 20px;">Créer la liste</button>
+                </div>
             </div>
 
-            <div class="caddie-grid">
-                <?php foreach ($caddie_grouped as $categorie => $items): ?>
-                    <div class="caddie-card">
-                        <div class="caddie-header">
-                            <span><?php echo htmlspecialchars($categorie); ?></span>
-                            <a href="?action=delete_caddie_category&categorie=<?php echo urlencode($categorie); ?>" class="delete-btn" title="Supprimer tout ce rayon" onclick="return confirm('Supprimer tout le rayon ?');">
-                                <i class="fa-solid fa-trash"></i>
-                            </a>
-                        </div>
-                        <div class="caddie-body">
-                            <?php foreach ($items as $item): ?>
-                                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                                    <label class="check-item <?php echo $item['est_achete'] ? 'checked' : ''; ?>">
-                                        <input type="checkbox" data-id="<?php echo $item['id']; ?>" <?php echo $item['est_achete'] ? 'checked' : ''; ?> onclick="toggleCheck(this)">
-                                        <span><?php echo htmlspecialchars($item['item_name']); ?></span>
-                                    </label>
-                                    <a href="?action=delete_caddie_item&id=<?php echo $item['id']; ?>" class="delete-btn" style="width:22px; height:22px; font-size:10px;">
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </a>
-                                </div>
-                            <?php endforeach; ?>
-
-                            <form method="POST" action="?action=add_caddie_item" style="display: flex; gap: 8px; margin-top: auto; padding-top: 15px; border-top: 2px dashed var(--border-color);">
-                                <input type="hidden" name="categorie" value="<?php echo htmlspecialchars($categorie); ?>">
-                                <input type="text" name="item_name" placeholder="Ajouter un article..." required class="brutal-input" style="flex: 1; padding: 6px 12px; font-size: 14px;">
-                                <button type="submit" class="brutal-btn-small" style="padding: 6px 12px;">+</button>
-                            </form>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+            <div class="caddie-grid" id="caddie-container"></div>
         </section>
 
         <section id="watchlist" class="page-section">
             <h2 class="section-title watchlist-title">La Watchlist 🍿</h2>
 
-            <div class="brutal-card" style="margin-bottom: 40px; background: #fff;">
+            <div class="brutal-card" style="margin-bottom: 40px;">
                 <h3 class="font-display" style="margin-bottom: 15px; font-size: 20px;">🎬 Ajouter une série à binge-watcher</h3>
-                <form method="POST" action="?action=add_anime" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
-                    <input type="text" name="titre" placeholder="Nom de l'anime..." required class="brutal-input" style="flex: 2; min-width: 220px;">
-                    <input type="number" name="max_episodes" placeholder="Nb épisodes max..." required min="1" class="brutal-input" style="flex: 1; min-width: 100px;">
-                    <button type="submit" class="brutal-btn-small" style="background: var(--color-purple); color: white; padding: 10px 20px;">Ajouter à la liste</button>
-                </form>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <input type="text" id="anime-title-input" placeholder="Nom de l'anime..." class="brutal-input" style="flex: 2; min-width: 220px;">
+                    <input type="number" id="anime-max-input" placeholder="Nb épisodes max..." min="1" value="12" class="brutal-input" style="flex: 1; min-width: 100px;">
+                    <button onclick="addAnime()" class="brutal-btn-small" style="background: var(--color-purple); color: white; padding: 10px 20px;">Ajouter à la liste</button>
+                </div>
             </div>
 
-            <div class="watchlist-grid">
-                <?php foreach ($watchlist_data as $info): 
-                    $slug = $info['slug'];
-                    $current_ep = $info['nb_episodes_vus'];
-                    $max_ep = $info['max_episodes'];
-                    $percent = ($max_ep > 0) ? ($current_ep / $max_ep) * 100 : 0;
-                ?>
-                    <div class="tracker-card">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-                            <h3><?php echo htmlspecialchars($info['titre']); ?></h3>
-                            <a href="?action=delete_anime&slug=<?php echo $slug; ?>" class="delete-btn" title="Retirer de la watchlist" onclick="return confirm('Retirer cet anime ?');">
-                                <i class="fa-solid fa-trash"></i>
-                            </a>
-                        </div>
-                        <div class="tracker-control">
-                            <button class="btn-counter" onclick="updateEp('<?php echo $slug; ?>', -1, <?php echo $max_ep; ?>)">-</button>
-                            <div class="tracker-status">Épisode <span id="ep-<?php echo $slug; ?>"><?php echo $current_ep; ?></span> / <?php echo $max_ep; ?></div>
-                            <button class="btn-counter" onclick="updateEp('<?php echo $slug; ?>', 1, <?php echo $max_ep; ?>)">+</button>
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar" id="bar-<?php echo $slug; ?>" style="width: <?php echo $percent; ?>%;"></div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+            <div class="watchlist-grid" id="watchlist-container"></div>
         </section>
 
     </div>
 
     <script>
-        // Extraction dynamique de la liste des animes enregistrés en BDD pour la machine à dé
-        const dynamicAnimes = <?php echo json_encode(array_column($watchlist_data, 'titre')); ?>;
+        // --- BASE DE DONNÉES LOCALE INITIALE (SI LOCALSTORAGE VIDE) ---
+        const defaultCourses = [
+            { id: 1, categorie: '🥩 Crèmerie & Frais', item_name: 'Filets de poulet', est_achete: false },
+            { id: 2, categorie: '🥩 Crèmerie & Frais', item_name: 'Crevettes (200-300g)', est_achete: false },
+            { id: 3, categorie: '🥩 Crèmerie & Frais', item_name: 'Jambon blanc', est_achete: false },
+            { id: 4, categorie: '🥩 Crèmerie & Frais', item_name: 'Mozzarella (x3)', est_achete: false },
+            { id: 5, categorie: '🍝 Épicerie Sec', item_name: 'Riz', est_achete: false },
+            { id: 6, categorie: '🍝 Épicerie Sec', item_name: 'Pâtes', est_achete: false },
+            { id: 7, categorie: '🍝 Épicerie Sec', item_name: 'Pesto vert', est_achete: false },
+            { id: 8, categorie: '🥦 Fruits & Légumes', item_name: 'Oignons (x2)', est_achete: false },
+            { id: 9, categorie: '🥦 Fruits & Légumes', item_name: 'Ail (1 tête)', est_achete: false },
+            { id: 10, categorie: '🍿 Snacks & Boissons', item_name: 'Brioche & Nutella', est_achete: false }
+        ];
 
-        // Gestion globale de la persistance de l'onglet actif
+        const defaultWatchlist = [
+            { slug: 'witch', titre: 'Witch Hat Atelier', nb_episodes_vus: 0, max_episodes: 12 },
+            { slug: 'apo', titre: 'Les Carnets de l’Apothicaire', nb_episodes_vus: 0, max_episodes: 24 },
+            { slug: 'jjk', titre: 'Jujutsu Kaisen', nb_episodes_vus: 0, max_episodes: 24 },
+            { slug: 'shangri', 'titre': 'Shangri-La Frontier', nb_episodes_vus: 0, max_episodes: 25 },
+            { slug: 'yona', 'titre': 'Yona of the Dawn', nb_episodes_vus: 0, max_episodes: 24 }
+        ];
+
+        // Chargement initial des données
+        let courses = JSON.parse(localStorage.getItem('courses_db')) || defaultCourses;
+        let watchlist = JSON.parse(localStorage.getItem('watchlist_db')) || defaultWatchlist;
+
+        function saveDB() {
+            localStorage.setItem('courses_db', JSON.stringify(courses));
+            localStorage.setItem('watchlist_db', JSON.stringify(watchlist));
+        }
+
+        // --- NAVIGATION CONTROLLER ---
         function toggleMenu() {
             document.getElementById('burger-btn').classList.toggle('open');
             document.getElementById('menu-links').classList.toggle('open');
@@ -542,17 +381,192 @@ foreach ($caddie_raw as $row) {
             document.getElementById('burger-btn').classList.remove('open');
             document.getElementById('menu-links').classList.remove('open');
             
-            // Sauvegarde de l'état
             localStorage.setItem('active_tab_weekend', tabId);
         }
 
-        // Restauration de l'onglet au rechargement
         window.addEventListener('DOMContentLoaded', () => {
             const activeTab = localStorage.getItem('active_tab_weekend') || 'home';
             switchTab(activeTab);
+            renderCaddie();
+            renderWatchlist();
         });
 
-        // Dé dynamique basé sur la BDD
+        // --- CADDIE ENGINE ---
+        function renderCaddie() {
+            const container = document.getElementById('caddie-container');
+            container.innerHTML = '';
+
+            // Grouper les articles par catégorie
+            const grouped = {};
+            courses.forEach(item => {
+                if (!grouped[item.categorie]) grouped[item.categorie] = [];
+                grouped[item.categorie].push(item);
+            });
+
+            // Générer les cartes HTML
+            Object.keys(grouped).forEach(category => {
+                let cardHTML = `
+                    <div class="caddie-card">
+                        <div class="caddie-header">
+                            <span>${category}</span>
+                            <button onclick="deleteCategory('${category}')" class="delete-btn" title="Supprimer ce rayon">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="caddie-body">
+                `;
+
+                grouped[category].forEach(item => {
+                    cardHTML += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                            <label class="check-item ${item.est_achete ? 'checked' : ''}">
+                                <input type="checkbox" ${item.est_achete ? 'checked' : ''} onclick="toggleCheck(${item.id})">
+                                <span>${item.item_name}</span>
+                            </label>
+                            <button onclick="deleteCaddieItem(${item.id})" class="delete-btn" style="width:22px; height:22px; font-size:10px;">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+
+                cardHTML += `
+                            <div style="display: flex; gap: 8px; margin-top: auto; padding-top: 15px; border-top: 2px dashed var(--border-color);">
+                                <input type="text" id="input-add-${btoa(encodeURIComponent(category)).replace(/=/g, '')}" placeholder="Ajouter un article..." class="brutal-input" style="flex: 1; padding: 6px 12px; font-size: 14px;">
+                                <button onclick="addCaddieItem('${category}')" class="brutal-btn-small" style="padding: 6px 12px;">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+            });
+        }
+
+        function addCaddieCategory() {
+            const input = document.getElementById('new-cat-name');
+            const catName = input.value.trim();
+            if(!catName) return;
+
+            // Créer la catégorie avec un premier élément bidon ou vide
+            courses.push({
+                id: Date.now(),
+                categorie: catName,
+                item_name: 'Exemple d\'article',
+                est_achete: false
+            });
+            input.value = '';
+            saveDB();
+            renderCaddie();
+        }
+
+        function addCaddieItem(category) {
+            const inputId = "input-add-" + btoa(encodeURIComponent(category)).replace(/=/g, '');
+            const input = document.getElementById(inputId);
+            const itemName = input.value.trim();
+            if(!itemName) return;
+
+            courses.push({
+                id: Date.now(),
+                categorie: category,
+                item_name: itemName,
+                est_achete: false
+            });
+            input.value = '';
+            saveDB();
+            renderCaddie();
+        }
+
+        function toggleCheck(id) {
+            const item = courses.find(c => c.id === id);
+            if(item) item.est_achete = !item.est_achete;
+            saveDB();
+            renderCaddie();
+        }
+
+        function deleteCaddieItem(id) {
+            courses = courses.filter(c => c.id !== id);
+            saveDB();
+            renderCaddie();
+        }
+
+        function deleteCategory(category) {
+            if(confirm("Supprimer tout le rayon ?")) {
+                courses = courses.filter(c => c.categorie !== category);
+                saveDB();
+                renderCaddie();
+            }
+        }
+
+        // --- WATCHLIST ENGINE ---
+        function renderWatchlist() {
+            const container = document.getElementById('watchlist-container');
+            container.innerHTML = '';
+
+            watchlist.forEach(anime => {
+                const percent = (anime.max_episodes > 0) ? (anime.nb_episodes_vus / anime.max_episodes) * 100 : 0;
+                container.innerHTML += `
+                    <div class="tracker-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                            <h3>${anime.titre}</h3>
+                            <button onclick="deleteAnime('${anime.slug}')" class="delete-btn" title="Retirer de la watchlist">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="tracker-control">
+                            <button class="btn-counter" onclick="updateEp('${anime.slug}', -1)">-</button>
+                            <div class="tracker-status">Épisode <span id="ep-${anime.slug}">${anime.nb_episodes_vus}</span> / ${anime.max_episodes}</div>
+                            <button class="btn-counter" onclick="updateEp('${anime.slug}', 1)">+</button>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="bar-${anime.slug}" style="width: ${percent}%;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function addAnime() {
+            const titleInput = document.getElementById('anime-title-input');
+            const maxInput = document.getElementById('anime-max-input');
+            const titre = titleInput.value.trim();
+            const max = parseInt(maxInput.value) || 12;
+
+            if(!titre) return;
+            const slug = titre.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+            watchlist.push({
+                slug: slug,
+                titre: titre,
+                nb_episodes_vus: 0,
+                max_episodes: max
+            });
+
+            titleInput.value = '';
+            saveDB();
+            renderWatchlist();
+        }
+
+        function updateEp(slug, change) {
+            const anime = watchlist.find(a => a.slug === slug);
+            if(anime) {
+                let newEp = anime.nb_episodes_vus + change;
+                if(newEp >= 0 && newEp <= anime.max_episodes) {
+                    anime.nb_episodes_vus = newEp;
+                    saveDB();
+                    renderWatchlist();
+                }
+            }
+        }
+
+        function deleteAnime(slug) {
+            if(confirm("Retirer cet anime de la liste ?")) {
+                watchlist = watchlist.filter(a => a.slug !== slug);
+                saveDB();
+                renderWatchlist();
+            }
+        }
+
+        // --- MACHINE A DE (DYNAMIQUE SUR LA WATCHLIST) ---
         function rollDice() {
             const dice = document.getElementById('dice');
             const resultBox = document.getElementById('dice-result');
@@ -564,59 +578,16 @@ foreach ($caddie_raw as $row) {
 
             setTimeout(() => {
                 dice.classList.remove('rolling');
-                if (dynamicAnimes.length === 0) {
+                if (watchlist.length === 0) {
                     dice.innerText = 'X';
-                    animeChosen.innerText = "Aucun anime dans la Watchlist !";
+                    animeChosen.innerText = "Aucun anime dans ta Watchlist !";
                 } else {
-                    const randomIndex = Math.floor(Math.random() * dynamicAnimes.length);
+                    const randomIndex = Math.floor(Math.random() * watchlist.length);
                     dice.innerText = randomIndex + 1;
-                    animeChosen.innerText = dynamicAnimes[randomIndex];
+                    animeChosen.innerText = watchlist[randomIndex].titre;
                 }
                 resultBox.style.display = 'block';
             }, 800);
-        }
-
-        // AJAX: Sauvegarde asynchrone des cases cochées (Caddie)
-        function toggleCheck(checkbox) {
-            const id = checkbox.getAttribute('data-id');
-            const isChecked = checkbox.checked ? 1 : 0;
-            
-            if (checkbox.checked) {
-                checkbox.parentElement.classList.add('checked');
-            } else {
-                checkbox.parentElement.classList.remove('checked');
-            }
-
-            const formData = new FormData();
-            formData.append('id', id);
-            formData.append('checked', isChecked);
-
-            fetch('?action=update_caddie', {
-                method: 'POST',
-                body: formData
-            }).catch(err => console.error("Erreur Caddie:", err));
-        }
-
-        // AJAX: Sauvegarde asynchrone des épisodes (Watchlist)
-        function updateEp(anime, change, maxEpisodes) {
-            const epSpan = document.getElementById('ep-' + anime);
-            let currentEp = parseInt(epSpan.innerText);
-            let newEp = currentEp + change;
-
-            if (newEp >= 0 && newEp <= maxEpisodes) {
-                epSpan.innerText = newEp;
-                const percent = (newEp / maxEpisodes) * 100;
-                document.getElementById('bar-' + anime).style.width = percent + '%';
-
-                const formData = new FormData();
-                formData.append('slug', anime);
-                formData.append('ep', newEp);
-
-                fetch('?action=update_anime', {
-                    method: 'POST',
-                    body: formData
-                }).catch(err => console.error("Erreur Anime:", err));
-            }
         }
     </script>
 </body>
