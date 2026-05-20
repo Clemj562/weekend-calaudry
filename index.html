@@ -7,7 +7,7 @@
     <title>Notre Paradis - V4.2 Final Edition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=DM+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2 family=Space+Grotesk:wght@400;600;700&family=DM+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -250,14 +250,14 @@
         .watchlist-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
         .tracker-card { background: var(--white); border: var(--border-width) solid var(--border-color); border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow-brutal); display: flex; flex-direction: column; gap: 15px; }
         .tracker-card h3 { font-size: 20px; border-bottom: 3px solid var(--border-color); padding-bottom: 8px; }
-        .tracker-control { display: flex; align-items: center; justify-content: space-between; background: #f1f2f6; padding: 10px 15px; border: 2px solid var(--border-color); border-radius: var(--radius-pill); }
+        .tracker-control { display: flex; align-items: center; justify-content: space-between; background: #f1f2f6; padding: 10px 15px; border: 2px solid var(--border-color); border-radius: var(--radius-pill); -pill); }
         .tracker-status { font-weight: 700; font-size: 14px; }
         .btn-counter { background: var(--color-yellow); border: 2px solid var(--border-color); width: 35px; height: 35px; border-radius: 50%; font-weight: 700; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 0px var(--border-color); }
         .btn-counter:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px; }
         .progress-container { background: #e0e0e0; border: 2px solid var(--border-color); height: 20px; border-radius: var(--radius-pill); overflow: hidden; }
         .progress-bar { background: var(--color-green); height: 100%; width: 0%; transition: width 0.3s ease; }
 
-        /* WIDGET SYNCHRO FLOTTANT (RÉTRECISSABLE - ACCESSIBLE EN BAS PC & MOBILE) */
+        /* WIDGET CLOUD RETRACTABLE INTELLIGENT (ACCESSIBLE EN BAS PC & MOBILE) */
         #sync-status-widget {
             position: fixed; bottom: 20px; right: 20px; background: var(--white); 
             border: var(--border-width) solid var(--border-color); padding: 8px 15px; 
@@ -440,7 +440,7 @@
                                 <span class="time-tag midi">MIDI</span>
                             </div>
                             <div class="meal-body">
-                                <div class="info-pill">Prrep: 10m</div>
+                                <div class="info-pill">Prép: 10m</div>
                                 <div class="info-pill">Cuisson: 10m</div>
                                 <div class="meal-label">Ingrédients</div>
                                 <div class="meal-content">Riz, filets de poulet, crème fraîche, curry en poudre, oignon, ail, cannelle</div>
@@ -630,9 +630,9 @@
     </div>
 
     <script>
-        // --- ☁️ CONFIGURATION CLOUD RE-STABILISÉE (NPOINT) ---
-        // Colle à nouveau ton ID unique npoint.io entre les guillemets ci-dessous.
-        const NPOINT_BIN_ID = "TON_BIN_ID_ICI"; 
+        // --- ☁️ CONFIGURATION CLOUD SÉCURISÉE (JSONBLOB) ---
+        // Colle ton ID unique créé sur https://jsonblob.com entre les guillemets ci-dessous.
+        const JSONBLOB_ID = "019e4619-2ff2-75cf-909e-91ba68450529"; 
 
         const defaultCourses = [
             { id: 1, categorie: '🥩 Crèmerie & Frais', item_name: 'Filets de poulet', est_achete: false },
@@ -677,10 +677,10 @@
         ];
 
         const defaultAnimeStats = [
-            { id: 1, titre: 'Witch Hat Atelier', action: 7, emotion: 8, humour: 6, univers: 10, taille: 'Moyen', mood: 'Fantasy', note: 'Visuels à couper le souffle !' },
-            { id: 2, titre: 'Les Carnets de l’Apothicaire', action: 5, emotion: 8, humour: 7, univers: 9, taille: 'Moyen', mood: 'Cozy', note: 'Intrigues captivantes.' },
-            { id: 3, titre: 'One Piece', action: 9, emotion: 10, humour: 9, univers: 10, taille: 'TRÈS long', mood: 'Émotion', note: 'Une aventure légendaire.' },
-            { id: 4, titre: 'Jujutsu Kaisen', action: 10, emotion: 8, humour: 7, univers: 8, taille: 'Moyen', mood: 'Hype', note: 'Animation incroyable.' }
+            { id: 1, titre: 'Witch Hat Atelier', action: 7, emotion: 8, humour: 6, univers: 10, taille: 'Moyen', mood: 'Fantasy', note: 'Visuels de fou !' },
+            { id: 2, titre: 'Les Carnets de l’Apothicaire', action: 5, emotion: 8, humour: 7, univers: 9, taille: 'Moyen', mood: 'Cozy', note: 'Trop intelligent.' },
+            { id: 3, titre: 'One Piece', action: 9, emotion: 10, humour: 9, univers: 10, taille: 'TRÈS long', mood: 'Émotion', note: 'Le chef d\'œuvre absolu.' },
+            { id: 4, titre: 'Jujutsu Kaisen', action: 10, emotion: 8, humour: 7, univers: 8, taille: 'Moyen', mood: 'Hype', note: 'Les combats sont incroyables.' }
         ];
 
         let appData = {
@@ -690,8 +690,9 @@
         };
 
         let editingAnimeId = null;
-        let saveTimeout = null; // Timer pour le système anti-spam
+        let cloudSaveTimeout = null; // Protection anti-surcharge
 
+        // --- GESTION DE L'INDICATEUR CLOUD FLOTTANT ---
         function updateSyncWidget(icon, text, bg, isSynced = false) {
             const widget = document.getElementById('sync-status-widget');
             if (widget) {
@@ -705,27 +706,26 @@
             }
         }
 
-        // --- SAUVEGARDE EN LIGNE AVEC DEBOUNCE ANTI-SOUCHAGE ---
+        // --- PIPELINE DE SAUVEGARDE INTEGRÉE (LOCAL + CLOUD DEBOUNCED) ---
         function saveDB() {
-            // Sauvegarde locale éclair
             localStorage.setItem('courses_db', JSON.stringify(appData.courses));
             localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
             localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
 
-            if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "TON_BIN_ID_ICI") {
+            if (!JSONBLOB_ID || JSONBLOB_ID === "TON_JSONBLOB_ID_ICI") {
                 updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
                 return;
             }
 
-            updateSyncWidget("⏳", "En attente...", "var(--color-yellow)", false);
+            updateSyncWidget("⏳", "Modifications locales...", "var(--color-yellow)", false);
 
-            // Annule la requête en cours si on reclique trop vite (battement de 1.2s)
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(async () => {
-                updateSyncWidget("⏳", "Synchronisation...", "var(--color-yellow)", false);
+            // Système Debounce : attend 1s de calme avant d'envoyer au cloud
+            clearTimeout(cloudSaveTimeout);
+            cloudSaveTimeout = setTimeout(async () => {
+                updateSyncWidget("⏳", "Envoi Cloud...", "var(--color-yellow)", false);
                 try {
-                    const response = await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`, {
-                        method: 'PUT', // PUT remplace l'intégralité proprement sans générer de conflits
+                    const response = await fetch(`https://jsonblob.com/api/jsonBlob/${JSONBLOB_ID}`, {
+                        method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(appData)
                     });
@@ -737,31 +737,30 @@
                 } catch (err) {
                     updateSyncWidget("❌", "Erreur réseau", "var(--color-pink)", false);
                 }
-            }, 1200);
+            }, 1000);
         }
 
-        // --- CHARGEMENT ROBUSTE DEPUIS NPOINT ---
+        // --- CHARGEMENT DU CLOUD ---
         async function loadDB() {
-            if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "TON_BIN_ID_ICI") {
+            if (!JSONBLOB_ID || JSONBLOB_ID === "TON_JSONBLOB_ID_ICI") {
                 updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
                 return;
             }
 
-            updateSyncWidget("⏳", "Récupération...", "var(--color-yellow)", false);
+            updateSyncWidget("⏳", "Vérification...", "var(--color-yellow)", false);
             try {
-                const response = await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`);
+                const response = await fetch(`https://jsonblob.com/api/jsonBlob/${JSONBLOB_ID}`);
                 if (response.ok) {
                     const onlineData = await response.json();
                     
-                    // Si le npoint est initial ou cassé ({}) : on le peuple immédiatement
+                    // Si le cloud est vide ({}), on pousse nos listes par défaut dessus
                     if (!onlineData || Object.keys(onlineData).length === 0 || !onlineData.courses) {
-                        updateSyncWidget("⏳", "Initialisation...", "var(--color-yellow)", false);
-                        await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`, {
+                        await fetch(`https://jsonblob.com/api/jsonBlob/${JSONBLOB_ID}`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(appData)
                         });
-                        updateSyncWidget("☁️", "À jour", "var(--color-green)", true);
+                        updateSyncWidget("☁️", "Initialisé", "var(--color-green)", true);
                         return;
                     }
 
@@ -774,7 +773,7 @@
                     }
                 }
             } catch (err) {
-                updateSyncWidget("❌", "Hors-ligne (Erreur réseau)", "var(--color-pink)", false);
+                updateSyncWidget("❌", "Mode local actif", "var(--color-pink)", false);
             }
         }
 
@@ -798,17 +797,17 @@
             localStorage.setItem('active_tab_weekend', tabId);
         }
 
-        // --- AFFICHAGE ASYNCHRONE INSTANTANÉ ---
+        // --- INITIALISATION INSTANTANÉE ---
         window.addEventListener('DOMContentLoaded', () => {
             const activeTab = localStorage.getItem('active_tab_weekend') || 'home';
             switchTab(activeTab);
             
-            // On affiche le local d'abord (0ms d'attente pour l'utilisateur)
+            // Affichage local immédiat (0ms d'attente)
             renderCaddie();
             renderWatchlist();
             renderAnimeStatsTable();
             
-            // Puis le cloud se synchronise calmement en tâche de fond
+            // Chargement transparent en tâche de fond
             loadDB().then(() => {
                 renderCaddie();
                 renderWatchlist();
@@ -816,7 +815,7 @@
             });
         });
 
-        // --- INTERFACE UNIVER ANIME (TABLEAU, NOTE, MOOD) ---
+        // --- UNIVER ANIME : FORMULAIRES, NOTE ET MOOD DYNAMIQUES ---
         function renderAnimeStatsTable() {
             const tbody = document.getElementById('anime-table-body');
             if (!tbody) return;
@@ -937,7 +936,7 @@
         }
 
         function deleteAnimeStat(id) {
-            if (confirm("Supprimer définitivement cet anime ?")) {
+            if (confirm("Supprimer cet anime ?")) {
                 appData.animeStats = appData.animeStats.filter(a => a.id !== id);
                 if (editingAnimeId === id) resetAnimeStatForm();
                 saveDB();
@@ -1030,14 +1029,6 @@
             renderCaddie();
         }
 
-        function deleteCategory(category) {
-            if(confirm("Supprimer tout le rayon ?")) {
-                appData.courses = appData.courses.filter(c => c.categorie !== category);
-                saveDB();
-                renderCaddie();
-            }
-        }
-
         // --- WATCHLIST ---
         function renderWatchlist() {
             const container = document.getElementById('watchlist-container');
@@ -1123,6 +1114,14 @@
                 }
                 resultBox.style.display = 'block';
             }, 800);
+        }
+
+        function deleteCategory(category) {
+            if(confirm("Supprimer tout le rayon ?")) {
+                appData.courses = appData.courses.filter(c => c.categorie !== category);
+                saveDB();
+                renderCaddie();
+            }
         }
     </script>
 </body>
