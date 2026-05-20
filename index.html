@@ -257,7 +257,7 @@
         .progress-container { background: #e0e0e0; border: 2px solid var(--border-color); height: 20px; border-radius: var(--radius-pill); overflow: hidden; }
         .progress-bar { background: var(--color-green); height: 100%; width: 0%; transition: width 0.3s ease; }
 
-        /* WIDGET CLOUD AMÉLIORÉ (RÉTRECISSABLE ET TOUJOURS EN BAS) */
+        /* WIDGET SYNCHRO FLOTTANT (RÉTRECISSABLE - ACCESSIBLE EN BAS PC & MOBILE) */
         #sync-status-widget {
             position: fixed; bottom: 20px; right: 20px; background: var(--white); 
             border: var(--border-width) solid var(--border-color); padding: 8px 15px; 
@@ -273,7 +273,6 @@
             white-space: nowrap;
             transition: max-width 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease;
         }
-        /* Effet rétractable automatique */
         #sync-status-widget.is-synced {
             padding: 8px 12px;
             gap: 0;
@@ -441,7 +440,7 @@
                                 <span class="time-tag midi">MIDI</span>
                             </div>
                             <div class="meal-body">
-                                <div class="info-pill">Prép: 10m</div>
+                                <div class="info-pill">Prrep: 10m</div>
                                 <div class="info-pill">Cuisson: 10m</div>
                                 <div class="meal-label">Ingrédients</div>
                                 <div class="meal-content">Riz, filets de poulet, crème fraîche, curry en poudre, oignon, ail, cannelle</div>
@@ -631,8 +630,9 @@
     </div>
 
     <script>
-
-        const JSONBLOB_ID = "b3435588d95ca2a06d5b"; 
+        // --- ☁️ CONFIGURATION CLOUD RE-STABILISÉE (NPOINT) ---
+        // Colle à nouveau ton ID unique npoint.io entre les guillemets ci-dessous.
+        const NPOINT_BIN_ID = "TON_BIN_ID_ICI"; 
 
         const defaultCourses = [
             { id: 1, categorie: '🥩 Crèmerie & Frais', item_name: 'Filets de poulet', est_achete: false },
@@ -690,8 +690,8 @@
         };
 
         let editingAnimeId = null;
+        let saveTimeout = null; // Timer pour le système anti-spam
 
-        // --- GESTION DE L'INDICATEUR CLOUD RÉTRACTABLE ---
         function updateSyncWidget(icon, text, bg, isSynced = false) {
             const widget = document.getElementById('sync-status-widget');
             if (widget) {
@@ -705,49 +705,63 @@
             }
         }
 
-        // --- SAUVEGARDE EN LIGNE (PUT SUR JSONBLOB) ---
-        async function saveDB() {
+        // --- SAUVEGARDE EN LIGNE AVEC DEBOUNCE ANTI-SOUCHAGE ---
+        function saveDB() {
+            // Sauvegarde locale éclair
             localStorage.setItem('courses_db', JSON.stringify(appData.courses));
             localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
             localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
 
-            if (!JSONBLOB_ID || JSONBLOB_ID === "TON_BLOB_ID_ICI") {
+            if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "TON_BIN_ID_ICI") {
                 updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
                 return;
             }
 
-            updateSyncWidget("⏳", "Synchronisation...", "var(--color-yellow)", false);
-            try {
-                const response = await fetch(`https://jsonblob.com/api/jsonBlob/${JSONBLOB_ID}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(appData)
-                });
-                if (response.ok) {
-                    updateSyncWidget("☁️", "Synchronisé avec le Cloud", "var(--color-green)", true);
-                } else {
-                    updateSyncWidget("❌", "Erreur Cloud", "var(--color-pink)", false);
+            updateSyncWidget("⏳", "En attente...", "var(--color-yellow)", false);
+
+            // Annule la requête en cours si on reclique trop vite (battement de 1.2s)
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                updateSyncWidget("⏳", "Synchronisation...", "var(--color-yellow)", false);
+                try {
+                    const response = await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`, {
+                        method: 'PUT', // PUT remplace l'intégralité proprement sans générer de conflits
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(appData)
+                    });
+                    if (response.ok) {
+                        updateSyncWidget("☁️", "Synchronisé", "var(--color-green)", true);
+                    } else {
+                        updateSyncWidget("❌", "Erreur Cloud", "var(--color-pink)", false);
+                    }
+                } catch (err) {
+                    updateSyncWidget("❌", "Erreur réseau", "var(--color-pink)", false);
                 }
-            } catch (err) {
-                updateSyncWidget("❌", "Erreur réseau", "var(--color-pink)", false);
-            }
+            }, 1200);
         }
 
-        // --- CHARGEMENT DEPUIS JSONBLOB ---
+        // --- CHARGEMENT ROBUSTE DEPUIS NPOINT ---
         async function loadDB() {
-            if (!JSONBLOB_ID || JSONBLOB_ID === "TON_BLOB_ID_ICI") {
+            if (!NPOINT_BIN_ID || NPOINT_BIN_ID === "TON_BIN_ID_ICI") {
                 updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
                 return;
             }
 
             updateSyncWidget("⏳", "Récupération...", "var(--color-yellow)", false);
             try {
-                const response = await fetch(`https://jsonblob.com/api/jsonBlob/${JSONBLOB_ID}`);
+                const response = await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`);
                 if (response.ok) {
                     const onlineData = await response.json();
                     
-                    if (!onlineData || Object.keys(onlineData).length === 0) {
-                        await saveDB(); 
+                    // Si le npoint est initial ou cassé ({}) : on le peuple immédiatement
+                    if (!onlineData || Object.keys(onlineData).length === 0 || !onlineData.courses) {
+                        updateSyncWidget("⏳", "Initialisation...", "var(--color-yellow)", false);
+                        await fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(appData)
+                        });
+                        updateSyncWidget("☁️", "À jour", "var(--color-green)", true);
                         return;
                     }
 
@@ -784,15 +798,17 @@
             localStorage.setItem('active_tab_weekend', tabId);
         }
 
-        // --- DEMARRAGE RAPIDE INTELLIGENT ---
-        window.addEventListener('DOMContentLoaded', async () => {
+        // --- AFFICHAGE ASYNCHRONE INSTANTANÉ ---
+        window.addEventListener('DOMContentLoaded', () => {
             const activeTab = localStorage.getItem('active_tab_weekend') || 'home';
             switchTab(activeTab);
             
+            // On affiche le local d'abord (0ms d'attente pour l'utilisateur)
             renderCaddie();
             renderWatchlist();
             renderAnimeStatsTable();
             
+            // Puis le cloud se synchronise calmement en tâche de fond
             loadDB().then(() => {
                 renderCaddie();
                 renderWatchlist();
