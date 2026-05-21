@@ -529,7 +529,7 @@
             margin-top: 20px;
         }
 
-        .concrete-box, .extra-box {
+        .extra-box {
             background: var(--white);
             padding: 20px;
             border: var(--border-width) solid var(--border-color);
@@ -1378,7 +1378,6 @@
                             <th>Taille</th>
                             <th>Mood</th>
                             <th>Note / Commentaire</th>
-                            <th>Par</th>
                             <th style="text-align: center; width: 100px;">Actions</th>
                         </tr>
                     </thead>
@@ -1435,7 +1434,7 @@
         // ========================================================
         const DATABASE_URL = "https://weekend-calaudry-default-rtdb.firebaseio.com/";
 
-        // --- UTILISATEUR PAR DÉFAUT (SYSTÈME D'INVITE SUPPRIMÉ) ---
+        // --- BACKEND FALLBACK ---
         let currentUser = "Utilisateur";
 
         // ========================================================
@@ -1601,7 +1600,6 @@
                         <td>${item.taille}</td>
                         <td><span class="badge" style="background:var(--text-main); color:var(--white); font-size:12px;">${item.mood || 'Aucun'}</span></td>
                         <td style="white-space: normal; max-width: 220px; font-style: italic; color:#555;">${item.note || '-'}</td>
-                        <td><span class="badge" style="background:var(--color-purple); color:white; font-size:11px;">👤 ${item.par || 'Origine'}</span></td>
                         <td style="text-align: center;">
                             <button onclick="fillAnimeStatForm(${item.id})" class="brutal-btn-small" style="padding: 4px 8px; font-size: 11px; background: var(--color-blue); color: white; margin-right: 4px;" title="Modifier">
                                 <i class="fa-solid fa-pen"></i>
@@ -1719,7 +1717,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
                             <label class="check-item ${item.est_achete ? 'checked' : ''}">
                                 <input type="checkbox" ${item.est_achete ? 'checked' : ''} onclick="toggleCheck(${item.id})">
-                                <span>${item.item_name} <small style="font-weight:normal; opacity:0.5; font-size:11px;">(${item.par || 'Initial'})</small></span>
+                                <span>${item.item_name}</span>
                             </label>
                             <button onclick="deleteCaddieItem(${item.id})" class="delete-btn" style="width:22px; height:22px; font-size:10px;">
                                 <i class="fa-solid fa-xmark"></i>
@@ -1803,9 +1801,6 @@
                             <button class="btn-counter" onclick="updateEp('${anime.slug}', -1)">-</button>
                             <div class="tracker-status">Épisode <span id="ep-${anime.slug}">${anime.nb_episodes_vus}</span> / ${anime.max_episodes}</div>
                             <button class="btn-counter" onclick="updateEp('${anime.slug}', 1)">+</button>
-                        </div>
-                        <div style="font-size: 11px; text-align: center; font-weight: bold; opacity: 0.6; margin-top: -5px;">
-                            Modifié par : ${anime.par || 'Initial'}
                         </div>
                         <div class="progress-container">
                             <div class="progress-bar" id="bar-${anime.slug}" style="width: ${percent}%;"></div>
@@ -1894,12 +1889,6 @@
             renderAnimeStatsTable();
 
             connectFirebaseRealtime();
-
-            // Badge Utilisateur connecté dans le menu
-            const menu = document.getElementById('menu-links');
-            if (menu) {
-                menu.innerHTML += `<li><span style="font-family:'Space Grotesk'; font-weight:700; font-size:14px; padding:10px 15px; background:var(--text-main); color:var(--white); border-radius:var(--radius-pill); display:inline-block; margin-left:10px;">By: ${currentUser}</span></li>`;
-            }
         });
     </script>
 
