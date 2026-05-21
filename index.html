@@ -1374,6 +1374,7 @@
                             <th>Taille</th>
                             <th>Mood</th>
                             <th>Note / Commentaire</th>
+                            <th>Par</th>
                             <th style="text-align: center; width: 100px;">Actions</th>
                         </tr>
                     </thead>
@@ -1613,6 +1614,7 @@
                         <td>${item.taille}</td>
                         <td><span class="badge" style="background:var(--text-main); color:var(--white); font-size:12px;">${item.mood || 'Aucun'}</span></td>
                         <td style="white-space: normal; max-width: 220px; font-style: italic; color:#555;">${item.note || '-'}</td>
+                        <td><span class="badge" style="background:var(--color-purple); color:white; font-size:11px;">👤 ${item.par || 'Origine'}</span></td>
                         <td style="text-align: center;">
                             <button onclick="fillAnimeStatForm(${item.id})" class="brutal-btn-small" style="padding: 4px 8px; font-size: 11px; background: var(--color-blue); color: white; margin-right: 4px;" title="Modifier">
                                 <i class="fa-solid fa-pen"></i>
@@ -1648,9 +1650,9 @@
 
             if (editingAnimeId !== null) {
                 const idx = appData.animeStats.findIndex(a => a.id === editingAnimeId);
-                if (idx > -1) appData.animeStats[idx] = { id: editingAnimeId, titre, action, emotion, humour, univers, taille, mood, note };
+                if (idx > -1) appData.animeStats[idx] = { id: editingAnimeId, titre, action, emotion, humour, univers, taille, mood, note, par: currentUser };
             } else {
-                appData.animeStats.push({ id: Date.now(), titre, action, emotion, humour, univers, taille, mood, note });
+                appData.animeStats.push({ id: Date.now(), titre, action, emotion, humour, univers, taille, mood, note, par: currentUser });
             }
             resetAnimeStatForm();
             saveDB();
@@ -1729,7 +1731,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
                             <label class="check-item ${item.est_achete ? 'checked' : ''}">
                                 <input type="checkbox" ${item.est_achete ? 'checked' : ''} onclick="toggleCheck(${item.id})">
-                                <span>${item.item_name}</span>
+                                <span>${item.item_name} <small style="font-weight:normal; opacity:0.5; font-size:11px;">(${item.par || 'Initial'})</small></span>
                             </label>
                             <button onclick="deleteCaddieItem(${item.id})" class="delete-btn" style="width:22px; height:22px; font-size:10px;">
                                 <i class="fa-solid fa-xmark"></i>
@@ -1753,18 +1755,18 @@
             const input = document.getElementById('new-cat-name');
             const catName = input.value.trim();
             if (!catName) return;
-            appData.courses.push({ id: Date.now(), categorie: catName, item_name: "Exemple d'article", est_achete: false });
+            // Ajout du "par: currentUser" ici aussi !
+            appData.courses.push({ id: Date.now(), categorie: catName, item_name: "Exemple d'article", est_achete: false, par: currentUser });
             input.value = '';
             saveDB();
             renderCaddie();
         }
 
-        function addCaddieItem(category) {
-            const inputId = "input-add-" + btoa(encodeURIComponent(category)).replace(/=/g, '');
-            const input = document.getElementById(inputId);
-            const itemName = input.value.trim();
-            if (!itemName) return;
-            appData.courses.push({ id: Date.now(), categorie: category, item_name: itemName, est_achete: false });
+        function addCaddieCategory() {
+            const input = document.getElementById('new-cat-name');
+            const catName = input.value.trim();
+            if (!catName) return;
+            appData.courses.push({ id: Date.now(), categorie: catName, item_name: "Exemple d'article", est_achete: false });
             input.value = '';
             saveDB();
             renderCaddie();
@@ -1772,7 +1774,10 @@
 
         function toggleCheck(id) {
             const item = appData.courses.find(c => c.id === id);
-            if (item) item.est_achete = !item.est_achete;
+            if (item) {
+                item.est_achete = !item.est_achete;
+                item.par = currentUser; // Enregistre aussi qui a coché/décoché
+            }
             saveDB();
             renderCaddie();
         }
@@ -1810,6 +1815,9 @@
                             <div class="tracker-status">Épisode <span id="ep-${anime.slug}">${anime.nb_episodes_vus}</span> / ${anime.max_episodes}</div>
                             <button class="btn-counter" onclick="updateEp('${anime.slug}', 1)">+</button>
                         </div>
+                        <div style="font-size: 11px; text-align: center; font-weight: bold; opacity: 0.6; margin-top: -5px;">
+                            Modifié par : ${anime.par || 'Initial'}
+                        </div>
                         <div class="progress-container">
                             <div class="progress-bar" id="bar-${anime.slug}" style="width: ${percent}%;"></div>
                         </div>
@@ -1825,7 +1833,7 @@
             const max = parseInt(maxInput.value) || 12;
             if (!titre) return;
             const slug = titre.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            appData.watchlist.push({ slug, titre, nb_episodes_vus: 0, max_episodes: max });
+            appData.watchlist.push({ slug, titre, nb_episodes_vus: 0, max_episodes: max, par: currentUser });
             titleInput.value = '';
             saveDB();
             renderWatchlist();
@@ -1896,8 +1904,21 @@
             // Lancement du tunnel temps réel Firebase
             connectFirebaseRealtime();
         });
+
+        window.updateEp = function (slug, change) {
+            const anime = appData.watchlist.find(a => a.slug === slug);
+            if (anime) {
+                const newEp = anime.nb_episodes_vus + change;
+                if (newEp >= 0 && newEp <= anime.max_episodes) {
+                    anime.nb_episodes_vus = newEp;
+                    anime.par = currentUser; // Met à jour l'auteur du changement d'épisode
+                    saveDB();
+                    renderWatchlist();
+                }
+            }
+        };
     </script>
-    
+
 </body>
 
 </html>
