@@ -1421,22 +1421,33 @@
 
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
         // ========================================================
-        // ☁️ CONFIGURATION GOOGLE FIREBASE DIRECTE (API REST)
+        // ☁️ COLLE TON URL FIREBASE DE BASE DE DONNÉES ICI
         // ========================================================
-        const FIREBASE_URL = "https://weekend-calaudry-default-rtdb.firebaseio.com/"; 
+        const DATABASE_URL = "https://weekend-calaudry-default-rtdb.firebaseio.com/";
+
+
 
         // --- SYSTÈME DE PSEUDO STRICTEMENT OBLIGATOIRE ---
         let currentUser = localStorage.getItem('user_pseudo');
+
+        // Tant que le pseudo est vide, nul ou juste des espaces, on repose la question
         while (!currentUser || currentUser.trim() === "") {
             currentUser = prompt("Un prénom est obligatoire pour accéder au site ! Quel est ton prénom ?", "Clémence");
+
+            // Si l'utilisateur valide avec un vrai texte, on l'enregistre
             if (currentUser && currentUser.trim() !== "") {
-                currentUser = currentUser.trim();
-                localStorage.setItem('user_pseudo', currentUser);
+                localStorage.setItem('user_pseudo', currentUser.trim());
             }
         }
 
+        // ========================================================
+        // DONNÉES PAR DÉFAUT
+        // ========================================================
         const defaultCourses = [
             { id: 1, categorie: '🥩 Crèmerie & Frais', item_name: 'Filets de poulet', est_achete: false },
             { id: 2, categorie: '🥩 Crèmerie & Frais', item_name: 'Crevettes (200-300g)', est_achete: false },
@@ -1494,6 +1505,14 @@
 
         let editingAnimeId = null;
         let cloudSaveTimeout = null;
+        let dbRef = null;
+
+        // Configuration initiale Firebase
+        if (DATABASE_URL && DATABASE_URL !== "TA_VRAIE_URL_FIREBASE_ICI") {
+            const firebaseApp = initializeApp({ databaseURL: DATABASE_URL });
+            const database = getDatabase(firebaseApp);
+            dbRef = ref(database, "appData");
+        }
 
         function updateSyncWidget(icon, text, bg, isSynced = false) {
             const widget = document.getElementById('sync-status-widget');
@@ -1503,75 +1522,56 @@
             isSynced ? widget.classList.add('is-synced') : widget.classList.remove('is-synced');
         }
 
+        // --- PIPELINE DE SAUVEGARDE INTEGRÉE ---
         function saveDB() {
             localStorage.setItem('courses_db', JSON.stringify(appData.courses));
             localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
             localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
 
-            if (!FIREBASE_URL || FIREBASE_URL.includes("TA_VRAIE_URL_FIREBASE_ICI")) {
+            if (!dbRef) {
                 updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
                 return;
             }
 
-            updateSyncWidget("⏳", "Modifications locales...", "var(--color-yellow)", false);
+            updateSyncWidget("⏳", "En attente...", "var(--color-yellow)", false);
 
             clearTimeout(cloudSaveTimeout);
-            cloudSaveTimeout = setTimeout(async function runSave() {
-                updateSyncWidget("⏳", "Envoi Cloud...", "var(--color-yellow)", false);
-                try {
-                    const response = await fetch(FIREBASE_URL, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(appData)
-                    });
-                    if (response.ok) {
-                        updateSyncWidget("☁️", "Synchronisé", "var(--color-green)", true);
-                    } else {
-                        updateSyncWidget("❌", `Erreur Cloud (${response.status})`, "var(--color-pink)", false);
-                    }
-                } catch (err) {
-                    updateSyncWidget("❌", "Erreur réseau", "var(--color-pink)", false);
-                }
-            }, 1500); 
+            cloudSaveTimeout = setTimeout(async () => {
+                updateSyncWidget("⏳", "Envoi Firebase...", "var(--color-yellow)", false);
+                set(dbRef, appData)
+                    .then(() => updateSyncWidget("☁️", "Synchronisé", "var(--color-green)", true))
+                    .catch(() => updateSyncWidget("❌", "Échec Firebase", "var(--color-pink)", false));
+            }, 1000);
         }
 
-        async function loadDB() {
-            if (!FIREBASE_URL || FIREBASE_URL.includes("TA_VRAIE_URL_FIREBASE_ICI")) {
+        // --- ECOUTE EN TEMPS RÉEL (FLUX DISCRET SANS RECHARGEMENT) ---
+        function connectFirebaseRealtime() {
+            if (!dbRef) {
                 updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
                 return;
             }
 
             updateSyncWidget("⏳", "Vérification...", "var(--color-yellow)", false);
-            try {
-                const response = await fetch(FIREBASE_URL);
-                if (response.ok) {
-                    const text = await response.text();
-                    
-                    if (!text || text.trim() === "" || text.trim() === "null" || text.trim() === "{}") {
-                        updateSyncWidget("⏳", "Initialisation...", "var(--color-yellow)", false);
-                        await fetch(FIREBASE_URL, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(appData)
-                        });
-                        updateSyncWidget("☁️", "Prêt", "var(--color-green)", true);
-                        return;
-                    }
+            onValue(dbRef, (snapshot) => {
+                const onlineData = snapshot.val();
+                if (onlineData && onlineData.courses) {
+                    appData = onlineData;
+                    localStorage.setItem('courses_db', JSON.stringify(appData.courses));
+                    localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
+                    localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
 
-                    const onlineData = JSON.parse(text);
-                    if (onlineData && onlineData.courses && onlineData.watchlist && onlineData.animeStats) {
-                        appData = onlineData;
-                        localStorage.setItem('courses_db', JSON.stringify(appData.courses));
-                        localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
-                        localStorage.setItem('animestats_db', JSON.stringify(appData.animeStats));
-                        updateSyncWidget("☁️", "À jour", "var(--color-green)", true);
-                    }
+                    renderCaddie();
+                    renderWatchlist();
+                    renderAnimeStatsTable();
+                    updateSyncWidget("☁️", "À jour", "var(--color-green)", true);
+                } else {
+                    // Si Firebase est totalement vierge, on y injecte nos structures locales
+                    set(dbRef, appData);
                 }
-            } catch (err) {
-                updateSyncWidget("❌", "Mode local actif", "var(--color-pink)", false);
-            }
+            });
         }
 
+        // --- NAVIGATION ---
         function toggleMenu() {
             document.getElementById('burger-btn').classList.toggle('open');
             document.getElementById('menu-links').classList.toggle('open');
@@ -1588,20 +1588,7 @@
             localStorage.setItem('active_tab_weekend', tabId);
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const activeTab = localStorage.getItem('active_tab_weekend') || 'home';
-            switchTab(activeTab);
-            renderCaddie();
-            renderWatchlist();
-            renderAnimeStatsTable();
-
-            loadDB().then(() => {
-                renderCaddie();
-                renderWatchlist();
-                renderAnimeStatsTable();
-            });
-        });
-
+        // --- UNIVER ANIME ---
         function renderAnimeStatsTable() {
             const tbody = document.getElementById('anime-table-body');
             if (!tbody) return;
@@ -1616,10 +1603,9 @@
             Object.values(moodContainers).forEach(el => { if (el) el.innerHTML = ''; });
 
             appData.animeStats.forEach(item => {
-                const par = item.ajoute_par ? `<br><small style="opacity:0.4; font-size:11px; font-weight:normal;">Par : ${item.ajoute_par}</small>` : '';
                 tbody.innerHTML += `
                     <tr>
-                        <td><strong>${item.titre}</strong>${par}</td>
+                        <td><strong>${item.titre}</strong></td>
                         <td><span class="${item.action >= 9 ? 'badge high' : 'badge'}">${item.action}</span></td>
                         <td><span class="${item.emotion >= 9 ? 'badge high' : 'badge'}">${item.emotion}</span></td>
                         <td><span class="${item.humour >= 9 ? 'badge high' : 'badge'}">${item.humour}</span></td>
@@ -1662,9 +1648,9 @@
 
             if (editingAnimeId !== null) {
                 const idx = appData.animeStats.findIndex(a => a.id === editingAnimeId);
-                if (idx > -1) appData.animeStats[idx] = { id: editingAnimeId, titre, action, emotion, humour, univers, taille, mood, note, ajoute_par: appData.animeStats[idx].ajoute_par || currentUser };
+                if (idx > -1) appData.animeStats[idx] = { id: editingAnimeId, titre, action, emotion, humour, univers, taille, mood, note };
             } else {
-                appData.animeStats.push({ id: Date.now(), titre, action, emotion, humour, univers, taille, mood, note, ajoute_par: currentUser });
+                appData.animeStats.push({ id: Date.now(), titre, action, emotion, humour, univers, taille, mood, note });
             }
             resetAnimeStatForm();
             saveDB();
@@ -1717,6 +1703,7 @@
             }
         }
 
+        // --- CADDIE ---
         function renderCaddie() {
             const container = document.getElementById('caddie-container');
             container.innerHTML = '';
@@ -1738,12 +1725,11 @@
                         <div class="caddie-body">
                 `;
                 grouped[category].forEach(item => {
-                    const par = item.ajoute_par ? ` <small style="opacity:0.4; font-size:11px; font-weight:normal;">(${item.ajoute_par})</small>` : '';
                     cardHTML += `
                         <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
                             <label class="check-item ${item.est_achete ? 'checked' : ''}">
                                 <input type="checkbox" ${item.est_achete ? 'checked' : ''} onclick="toggleCheck(${item.id})">
-                                <span>${item.item_name}${par}</span>
+                                <span>${item.item_name}</span>
                             </label>
                             <button onclick="deleteCaddieItem(${item.id})" class="delete-btn" style="width:22px; height:22px; font-size:10px;">
                                 <i class="fa-solid fa-xmark"></i>
@@ -1767,26 +1753,21 @@
             const input = document.getElementById('new-cat-name');
             const catName = input.value.trim();
             if (!catName) return;
-            appData.courses.push({ id: Date.now(), categorie: catName, item_name: "Exemple d'article", est_achete: false, ajoute_par: currentUser });
+            appData.courses.push({ id: Date.now(), categorie: catName, item_name: "Exemple d'article", est_achete: false });
             input.value = '';
             saveDB();
             renderCaddie();
         }
 
-        // --- CORRECTION AJOUT ARTICLE (SANS CRASH SI CHAÎNE ÉTRANGE) ---
         function addCaddieItem(category) {
-            try {
-                const inputId = "input-add-" + btoa(encodeURIComponent(category)).replace(/=/g, '');
-                const input = document.getElementById(inputId);
-                const itemName = input.value.trim();
-                if (!itemName) return;
-                appData.courses.push({ id: Date.now(), categorie: category, item_name: itemName, est_achete: false, ajoute_par: currentUser });
-                input.value = '';
-                saveDB();
-                renderCaddie();
-            } catch(e) {
-                console.error(e);
-            }
+            const inputId = "input-add-" + btoa(encodeURIComponent(category)).replace(/=/g, '');
+            const input = document.getElementById(inputId);
+            const itemName = input.value.trim();
+            if (!itemName) return;
+            appData.courses.push({ id: Date.now(), categorie: category, item_name: itemName, est_achete: false });
+            input.value = '';
+            saveDB();
+            renderCaddie();
         }
 
         function toggleCheck(id) {
@@ -1810,16 +1791,16 @@
             }
         }
 
+        // --- WATCHLIST ---
         function renderWatchlist() {
             const container = document.getElementById('watchlist-container');
             container.innerHTML = '';
             appData.watchlist.forEach(anime => {
                 const percent = (anime.max_episodes > 0) ? (anime.nb_episodes_vus / anime.max_episodes) * 100 : 0;
-                const par = anime.ajoute_par ? `<br><small style="opacity:0.4; font-size:11px; font-weight:normal;">Ajouté par : ${anime.ajoute_par}</small>` : '';
                 container.innerHTML += `
                     <div class="tracker-card">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-                            <h3>${anime.titre}${par}</h3>
+                            <h3>${anime.titre}</h3>
                             <button onclick="deleteAnime('${anime.slug}')" class="delete-btn" title="Retirer de la watchlist">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
@@ -1844,13 +1825,26 @@
             const max = parseInt(maxInput.value) || 12;
             if (!titre) return;
             const slug = titre.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            appData.watchlist.push({ slug, titre, nb_episodes_vus: 0, max_episodes: max, ajoute_par: currentUser });
+            appData.watchlist.push({ slug, titre, nb_episodes_vus: 0, max_episodes: max });
             titleInput.value = '';
             saveDB();
             renderWatchlist();
         }
 
-        function updateEp(slug, change) {
+        // --- ALIGNEMENT GLOBAL DES MODULES VERS WINDOW (OBLIGATOIRE POUR TYPE="MODULE") ---
+        window.toggleMenu = toggleMenu;
+        window.switchTab = switchTab;
+        window.addOrUpdateAnimeStat = addOrUpdateAnimeStat;
+        window.fillAnimeStatForm = fillAnimeStatForm;
+        window.resetAnimeStatForm = resetAnimeStatForm;
+        window.deleteAnimeStat = deleteAnimeStat;
+        window.addCaddieCategory = addCaddieCategory;
+        window.addCaddieItem = addCaddieItem;
+        window.toggleCheck = toggleCheck;
+        window.deleteCaddieItem = deleteCaddieItem;
+        window.deleteCategory = deleteCategory;
+        window.addAnime = addAnime;
+        window.updateEp = function (slug, change) {
             const anime = appData.watchlist.find(a => a.slug === slug);
             if (anime) {
                 const newEp = anime.nb_episodes_vus + change;
@@ -1860,18 +1854,15 @@
                     renderWatchlist();
                 }
             }
-        }
-
-        // --- SECURITÉ ET DIVERSES ROUTINES D'ÉLIMINATION ---
-        function deleteAnime(slug) {
+        };
+        window.deleteAnime = function (slug) {
             if (confirm("Retirer cet anime ?")) {
                 appData.watchlist = appData.watchlist.filter(a => a.slug !== slug);
                 saveDB();
                 renderWatchlist();
             }
-        }
-
-        function rollDice() {
+        };
+        window.rollDice = function () {
             const dice = document.getElementById('dice');
             const resultBox = document.getElementById('dice-result');
             const animeChosen = document.getElementById('anime-chosen');
@@ -1890,16 +1881,23 @@
                 }
                 resultBox.style.display = 'block';
             }, 800);
-        }
+        };
 
-        function deleteCategory(category) {
-            if (confirm("Supprimer tout le rayon ?")) {
-                appData.courses = appData.courses.filter(c => c.categorie !== category);
-                saveDB();
-                renderCaddie();
-            }
-        }
+        // --- INIT AU DEMARRAGE ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const activeTab = localStorage.getItem('active_tab_weekend') || 'home';
+            switchTab(activeTab);
+
+            // Affichage local immédiat pour éviter toute lenteur visuelle
+            renderCaddie();
+            renderWatchlist();
+            renderAnimeStatsTable();
+
+            // Lancement du tunnel temps réel Firebase
+            connectFirebaseRealtime();
+        });
     </script>
+    
 </body>
 
 </html>
