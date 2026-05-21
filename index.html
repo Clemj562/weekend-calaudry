@@ -529,7 +529,7 @@
             margin-top: 20px;
         }
 
-        .extra-box {
+        .concrete-box, .extra-box {
             background: var(--white);
             padding: 20px;
             border: var(--border-width) solid var(--border-color);
@@ -1435,16 +1435,8 @@
         // ========================================================
         const DATABASE_URL = "https://weekend-calaudry-default-rtdb.firebaseio.com/";
 
-        // --- SYSTÈME DE PSEUDO STRICTEMENT OBLIGATOIRE ---
-        let currentUser = localStorage.getItem('user_pseudo');
-
-        while (!currentUser || currentUser.trim() === "") {
-            currentUser = prompt("Un prénom est obligatoire pour accéder au site ! Quel est ton prénom ?", "Clémence");
-
-            if (currentUser && currentUser.trim() !== "") {
-                localStorage.setItem('user_pseudo', currentUser.trim());
-            }
-        }
+        // --- UTILISATEUR PAR DÉFAUT (SYSTÈME D'INVITE SUPPRIMÉ) ---
+        let currentUser = "Utilisateur";
 
         // ========================================================
         // DONNÉES PAR DÉFAUT
@@ -1903,7 +1895,7 @@
 
             connectFirebaseRealtime();
 
-            // Badge Prénom connecté dans le menu
+            // Badge Utilisateur connecté dans le menu
             const menu = document.getElementById('menu-links');
             if (menu) {
                 menu.innerHTML += `<li><span style="font-family:'Space Grotesk'; font-weight:700; font-size:14px; padding:10px 15px; background:var(--text-main); color:var(--white); border-radius:var(--radius-pill); display:inline-block; margin-left:10px;">By: ${currentUser}</span></li>`;
