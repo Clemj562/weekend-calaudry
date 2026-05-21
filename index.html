@@ -636,7 +636,7 @@
             width: 100%;
             border-collapse: collapse;
             font-weight: 600;
-            white-space: nowrap;
+            /* Suppression du white-space: nowrap global */
         }
 
         th {
@@ -654,6 +654,22 @@
             border-bottom: 2px solid var(--border-color);
             border-right: 2px solid var(--border-color);
             font-size: 14px;
+            white-space: nowrap; /* On garde les badges sur une seule ligne pour le style */
+        }
+
+        /* --- DES CASES PLUS GRANDES SANS GLISSER (PC) --- */
+        
+        /* Colonne 1 : Nom de l'Anime */
+        table th:nth-child(1), table td:nth-child(1) {
+            white-space: normal;
+            min-width: 180px;
+        }
+
+        /* Colonne 8 : Note / Commentaire */
+        table th:nth-child(8), table td:nth-child(8) {
+            white-space: normal !important;
+            min-width: 350px; /* Donne une large base à la case */
+            max-width: 550px !important; /* Permet au texte de s'étaler confortablement */
         }
 
         td:last-child {
