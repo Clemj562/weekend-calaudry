@@ -1431,16 +1431,12 @@
         // ========================================================
         const DATABASE_URL = "https://weekend-calaudry-default-rtdb.firebaseio.com/";
 
-
-
         // --- SYSTÈME DE PSEUDO STRICTEMENT OBLIGATOIRE ---
         let currentUser = localStorage.getItem('user_pseudo');
 
-        // Tant que le pseudo est vide, nul ou juste des espaces, on repose la question
         while (!currentUser || currentUser.trim() === "") {
             currentUser = prompt("Un prénom est obligatoire pour accéder au site ! Quel est ton prénom ?", "Clémence");
 
-            // Si l'utilisateur valide avec un vrai texte, on l'enregistre
             if (currentUser && currentUser.trim() !== "") {
                 localStorage.setItem('user_pseudo', currentUser.trim());
             }
@@ -1450,52 +1446,52 @@
         // DONNÉES PAR DÉFAUT
         // ========================================================
         const defaultCourses = [
-            { id: 1, categorie: '🥩 Crèmerie & Frais', item_name: 'Filets de poulet', est_achete: false },
-            { id: 2, categorie: '🥩 Crèmerie & Frais', item_name: 'Crevettes (200-300g)', est_achete: false },
-            { id: 3, categorie: '🥩 Crèmerie & Frais', item_name: 'Jambon blanc', est_achete: false },
-            { id: 4, categorie: '🥩 Crèmerie & Frais', item_name: 'Mozzarella (x3)', est_achete: false },
-            { id: 5, categorie: '🥩 Crèmerie & Frais', item_name: 'Béchamel', est_achete: false },
-            { id: 6, categorie: '🥩 Crèmerie & Frais', item_name: 'Crème fraîche', est_achete: false },
-            { id: 7, categorie: '🥩 Crèmerie & Frais', item_name: 'Beurre', est_achete: false },
-            { id: 8, categorie: '🍝 Épicerie Sec', item_name: 'Riz', est_achete: false },
-            { id: 9, categorie: '🍝 Épicerie Sec', item_name: 'Pâtes', est_achete: false },
-            { id: 10, categorie: '🍝 Épicerie Sec', item_name: 'Pâtes à lasagnes', est_achete: false },
-            { id: 11, categorie: '🍝 Épicerie Sec', item_name: 'Conserve Tomates pelées', est_achete: false },
-            { id: 12, categorie: '🍝 Épicerie Sec', item_name: 'Conserve Haricots rouges', est_achete: false },
-            { id: 13, categorie: '🍝 Épicerie Sec', item_name: 'Pesto vert', est_achete: false },
-            { id: 14, categorie: '🍝 Épicerie Sec', item_name: 'Sauce Tomapizza', est_achete: false },
-            { id: 15, categorie: '🍝 Épicerie Sec', item_name: 'Épices (Curry, Cumin, Curcuma, Cannelle)', est_achete: false },
-            { id: 16, categorie: '🥦 Fruits & Légumes', item_name: 'Oignons (x2)', est_achete: false },
-            { id: 17, categorie: '🥦 Fruits & Légumes', item_name: 'Ail (1 tête)', est_achete: false },
-            { id: 18, categorie: '🥦 Fruits & Légumes', item_name: 'Courgettes', est_achete: false },
-            { id: 19, categorie: '🥦 Fruits & Légumes', item_name: 'Coriandre (facultatif)', est_achete: false },
-            { id: 20, categorie: '🍿 Snacks & Boissons', item_name: 'Brioche & Nutella', est_achete: false },
-            { id: 21, categorie: '🍿 Snacks & Boissons', item_name: 'Cracottes', est_achete: false },
-            { id: 22, categorie: '🍿 Snacks & Boissons', item_name: "Jus d'orange", est_achete: false },
-            { id: 23, categorie: '🍿 Snacks & Boissons', item_name: 'Monster Munch / Belin', est_achete: false },
-            { id: 24, categorie: '🍿 Snacks & Boissons', item_name: 'Sodas / Ingrédients Mojito', est_achete: false }
+            { id: 1, categorie: '🥩 Crèmerie & Frais', item_name: 'Filets de poulet', est_achete: false, par: 'Initial' },
+            { id: 2, categorie: '🥩 Crèmerie & Frais', item_name: 'Crevettes (200-300g)', est_achete: false, par: 'Initial' },
+            { id: 3, categorie: '🥩 Crèmerie & Frais', item_name: 'Jambon blanc', est_achete: false, par: 'Initial' },
+            { id: 4, categorie: '🥩 Crèmerie & Frais', item_name: 'Mozzarella (x3)', est_achete: false, par: 'Initial' },
+            { id: 5, categorie: '🥩 Crèmerie & Frais', item_name: 'Béchamel', est_achete: false, par: 'Initial' },
+            { id: 6, categorie: '🥩 Crèmerie & Frais', item_name: 'Crème fraîche', est_achete: false, par: 'Initial' },
+            { id: 7, categorie: '🥩 Crèmerie & Frais', item_name: 'Beurre', est_achete: false, par: 'Initial' },
+            { id: 8, categorie: '🍝 Épicerie Sec', item_name: 'Riz', est_achete: false, par: 'Initial' },
+            { id: 9, categorie: '🍝 Épicerie Sec', item_name: 'Pâtes', est_achete: false, par: 'Initial' },
+            { id: 10, categorie: '🍝 Épicerie Sec', item_name: 'Pâtes à lasagnes', est_achete: false, par: 'Initial' },
+            { id: 11, categorie: '🍝 Épicerie Sec', item_name: 'Conserve Tomates pelées', est_achete: false, par: 'Initial' },
+            { id: 12, categorie: '🍝 Épicerie Sec', item_name: 'Conserve Haricots rouges', est_achete: false, par: 'Initial' },
+            { id: 13, categorie: '🍝 Épicerie Sec', item_name: 'Pesto vert', est_achete: false, par: 'Initial' },
+            { id: 14, categorie: '🍝 Épicerie Sec', item_name: 'Sauce Tomapizza', est_achete: false, par: 'Initial' },
+            { id: 15, categorie: '🍝 Épicerie Sec', item_name: 'Épices (Curry, Cumin, Curcuma, Cannelle)', est_achete: false, par: 'Initial' },
+            { id: 16, categorie: '🥦 Fruits & Légumes', item_name: 'Oignons (x2)', est_achete: false, par: 'Initial' },
+            { id: 17, categorie: '🥦 Fruits & Légumes', item_name: 'Ail (1 tête)', est_achete: false, par: 'Initial' },
+            { id: 18, categorie: '🥦 Fruits & Légumes', item_name: 'Courgettes', est_achete: false, par: 'Initial' },
+            { id: 19, categorie: '🥦 Fruits & Légumes', item_name: 'Coriandre (facultatif)', est_achete: false, par: 'Initial' },
+            { id: 20, categorie: '🍿 Snacks & Boissons', item_name: 'Brioche & Nutella', est_achete: false, par: 'Initial' },
+            { id: 21, categorie: '🍿 Snacks & Boissons', item_name: 'Cracottes', est_achete: false, par: 'Initial' },
+            { id: 22, categorie: '🍿 Snacks & Boissons', item_name: "Jus d'orange", est_achete: false, par: 'Initial' },
+            { id: 23, categorie: '🍿 Snacks & Boissons', item_name: 'Monster Munch / Belin', est_achete: false, par: 'Initial' },
+            { id: 24, categorie: '🍿 Snacks & Boissons', item_name: 'Sodas / Ingrédients Mojito', est_achete: false, par: 'Initial' }
         ];
 
         const defaultWatchlist = [
-            { slug: 'witch', titre: 'Witch Hat Atelier', nb_episodes_vus: 0, max_episodes: 12 },
-            { slug: 'apo', titre: 'Les Carnets de l\u2019Apothicaire', nb_episodes_vus: 0, max_episodes: 24 },
-            { slug: 'jjk', titre: 'Jujutsu Kaisen', nb_episodes_vus: 0, max_episodes: 24 },
-            { slug: 'shangri', titre: 'Shangri-La Frontier', nb_episodes_vus: 0, max_episodes: 25 },
-            { slug: 'yona', titre: 'Yona of the Dawn', nb_episodes_vus: 0, max_episodes: 24 },
-            { slug: 'overlord', titre: 'Overlord', nb_episodes_vus: 0, max_episodes: 13 },
-            { slug: 'assassination', titre: 'Assassination Classroom', nb_episodes_vus: 0, max_episodes: 22 },
-            { slug: 'onepiece', titre: 'One Piece', nb_episodes_vus: 0, max_episodes: 1120 },
-            { slug: 'ghibli', titre: 'Studio Ghibli (Films)', nb_episodes_vus: 0, max_episodes: 23 },
-            { slug: 'sololeveling', titre: 'Solo Leveling', nb_episodes_vus: 0, max_episodes: 12 },
-            { slug: 'spyfamily', titre: 'Spy \u00d7 Family', nb_episodes_vus: 0, max_episodes: 25 },
-            { slug: 'slime', titre: 'Tueuse de slime 300 ans', nb_episodes_vus: 0, max_episodes: 12 }
+            { slug: 'witch', titre: 'Witch Hat Atelier', nb_episodes_vus: 0, max_episodes: 12, par: 'Initial' },
+            { slug: 'apo', titre: 'Les Carnets de l\u2019Apothicaire', nb_episodes_vus: 0, max_episodes: 24, par: 'Initial' },
+            { slug: 'jjk', titre: 'Jujutsu Kaisen', nb_episodes_vus: 0, max_episodes: 24, par: 'Initial' },
+            { slug: 'shangri', titre: 'Shangri-La Frontier', nb_episodes_vus: 0, max_episodes: 25, par: 'Initial' },
+            { slug: 'yona', titre: 'Yona of the Dawn', nb_episodes_vus: 0, max_episodes: 24, par: 'Initial' },
+            { slug: 'overlord', titre: 'Overlord', nb_episodes_vus: 0, max_episodes: 13, par: 'Initial' },
+            { slug: 'assassination', titre: 'Assassination Classroom', nb_episodes_vus: 0, max_episodes: 22, par: 'Initial' },
+            { slug: 'onepiece', titre: 'One Piece', nb_episodes_vus: 0, max_episodes: 1120, par: 'Initial' },
+            { slug: 'ghibli', titre: 'Studio Ghibli (Films)', nb_episodes_vus: 0, max_episodes: 23, par: 'Initial' },
+            { slug: 'sololeveling', titre: 'Solo Leveling', nb_episodes_vus: 0, max_episodes: 12, par: 'Initial' },
+            { slug: 'spyfamily', titre: 'Spy \u00d7 Family', nb_episodes_vus: 0, max_episodes: 25, par: 'Initial' },
+            { slug: 'slime', titre: 'Tueuse de slime 300 ans', nb_episodes_vus: 0, max_episodes: 12, par: 'Initial' }
         ];
 
         const defaultAnimeStats = [
-            { id: 1, titre: 'Witch Hat Atelier', action: 7, emotion: 8, humour: 6, univers: 10, taille: 'Moyen', mood: 'Fantasy', note: 'Visuels de fou !' },
-            { id: 2, titre: 'Les Carnets de l\u2019Apothicaire', action: 5, emotion: 8, humour: 7, univers: 9, taille: 'Moyen', mood: 'Cozy', note: 'Trop intelligent.' },
-            { id: 3, titre: 'One Piece', action: 9, emotion: 10, humour: 9, univers: 10, taille: 'TRÈS long', mood: 'Émotion', note: "Le chef d'œuvre absolu." },
-            { id: 4, titre: 'Jujutsu Kaisen', action: 10, emotion: 8, humour: 7, univers: 8, taille: 'Moyen', mood: 'Hype', note: 'Les combats sont incroyables.' }
+            { id: 1, titre: 'Witch Hat Atelier', action: 7, emotion: 8, humour: 6, univers: 10, taille: 'Moyen', mood: 'Fantasy', note: 'Visuels de fou !', par: 'Initial' },
+            { id: 2, titre: 'Les Carnets de l\u2019Apothicaire', action: 5, emotion: 8, humour: 7, univers: 9, taille: 'Moyen', mood: 'Cozy', note: 'Trop intelligent.', par: 'Initial' },
+            { id: 3, titre: 'One Piece', action: 9, emotion: 10, humour: 9, univers: 10, taille: 'TRÈS long', mood: 'Émotion', note: "Le chef d'œuvre absolu.", par: 'Initial' },
+            { id: 4, titre: 'Jujutsu Kaisen', action: 10, emotion: 8, humour: 7, univers: 8, taille: 'Moyen', mood: 'Hype', note: 'Les combats sont incroyables.', par: 'Initial' }
         ];
 
         let appData = {
@@ -1508,7 +1504,6 @@
         let cloudSaveTimeout = null;
         let dbRef = null;
 
-        // Configuration initiale Firebase
         if (DATABASE_URL && DATABASE_URL !== "TA_VRAIE_URL_FIREBASE_ICI") {
             const firebaseApp = initializeApp({ databaseURL: DATABASE_URL });
             const database = getDatabase(firebaseApp);
@@ -1523,7 +1518,6 @@
             isSynced ? widget.classList.add('is-synced') : widget.classList.remove('is-synced');
         }
 
-        // --- PIPELINE DE SAUVEGARDE INTEGRÉE ---
         function saveDB() {
             localStorage.setItem('courses_db', JSON.stringify(appData.courses));
             localStorage.setItem('watchlist_db', JSON.stringify(appData.watchlist));
@@ -1545,7 +1539,6 @@
             }, 1000);
         }
 
-        // --- ECOUTE EN TEMPS RÉEL (FLUX DISCRET SANS RECHARGEMENT) ---
         function connectFirebaseRealtime() {
             if (!dbRef) {
                 updateSyncWidget("☁️", "Mode Local (Hors-ligne)", "var(--white)", false);
@@ -1566,13 +1559,11 @@
                     renderAnimeStatsTable();
                     updateSyncWidget("☁️", "À jour", "var(--color-green)", true);
                 } else {
-                    // Si Firebase est totalement vierge, on y injecte nos structures locales
                     set(dbRef, appData);
                 }
             });
         }
 
-        // --- NAVIGATION ---
         function toggleMenu() {
             document.getElementById('burger-btn').classList.toggle('open');
             document.getElementById('menu-links').classList.toggle('open');
@@ -1708,6 +1699,7 @@
         // --- CADDIE ---
         function renderCaddie() {
             const container = document.getElementById('caddie-container');
+            if (!container) return;
             container.innerHTML = '';
             const grouped = {};
             appData.courses.forEach(item => {
@@ -1755,18 +1747,18 @@
             const input = document.getElementById('new-cat-name');
             const catName = input.value.trim();
             if (!catName) return;
-            // Ajout du "par: currentUser" ici aussi !
             appData.courses.push({ id: Date.now(), categorie: catName, item_name: "Exemple d'article", est_achete: false, par: currentUser });
             input.value = '';
             saveDB();
             renderCaddie();
         }
 
-        function addCaddieCategory() {
-            const input = document.getElementById('new-cat-name');
-            const catName = input.value.trim();
-            if (!catName) return;
-            appData.courses.push({ id: Date.now(), categorie: catName, item_name: "Exemple d'article", est_achete: false });
+        function addCaddieItem(category) {
+            const inputId = "input-add-" + btoa(encodeURIComponent(category)).replace(/=/g, '');
+            const input = document.getElementById(inputId);
+            const itemName = input.value.trim();
+            if (!itemName) return;
+            appData.courses.push({ id: Date.now(), categorie: category, item_name: itemName, est_achete: false, par: currentUser });
             input.value = '';
             saveDB();
             renderCaddie();
@@ -1776,7 +1768,7 @@
             const item = appData.courses.find(c => c.id === id);
             if (item) {
                 item.est_achete = !item.est_achete;
-                item.par = currentUser; // Enregistre aussi qui a coché/décoché
+                item.par = currentUser;
             }
             saveDB();
             renderCaddie();
@@ -1799,6 +1791,7 @@
         // --- WATCHLIST ---
         function renderWatchlist() {
             const container = document.getElementById('watchlist-container');
+            if (!container) return;
             container.innerHTML = '';
             appData.watchlist.forEach(anime => {
                 const percent = (anime.max_episodes > 0) ? (anime.nb_episodes_vus / anime.max_episodes) * 100 : 0;
@@ -1839,7 +1832,7 @@
             renderWatchlist();
         }
 
-        // --- ALIGNEMENT GLOBAL DES MODULES VERS WINDOW (OBLIGATOIRE POUR TYPE="MODULE") ---
+        // --- ALIGNEMENT GLOBAL DES MODULES VERS WINDOW ---
         window.toggleMenu = toggleMenu;
         window.switchTab = switchTab;
         window.addOrUpdateAnimeStat = addOrUpdateAnimeStat;
@@ -1852,17 +1845,20 @@
         window.deleteCaddieItem = deleteCaddieItem;
         window.deleteCategory = deleteCategory;
         window.addAnime = addAnime;
+        
         window.updateEp = function (slug, change) {
             const anime = appData.watchlist.find(a => a.slug === slug);
             if (anime) {
                 const newEp = anime.nb_episodes_vus + change;
                 if (newEp >= 0 && newEp <= anime.max_episodes) {
                     anime.nb_episodes_vus = newEp;
+                    anime.par = currentUser;
                     saveDB();
                     renderWatchlist();
                 }
             }
         };
+        
         window.deleteAnime = function (slug) {
             if (confirm("Retirer cet anime ?")) {
                 appData.watchlist = appData.watchlist.filter(a => a.slug !== slug);
@@ -1870,6 +1866,7 @@
                 renderWatchlist();
             }
         };
+        
         window.rollDice = function () {
             const dice = document.getElementById('dice');
             const resultBox = document.getElementById('dice-result');
@@ -1896,27 +1893,18 @@
             const activeTab = localStorage.getItem('active_tab_weekend') || 'home';
             switchTab(activeTab);
 
-            // Affichage local immédiat pour éviter toute lenteur visuelle
             renderCaddie();
             renderWatchlist();
             renderAnimeStatsTable();
 
-            // Lancement du tunnel temps réel Firebase
             connectFirebaseRealtime();
-        });
 
-        window.updateEp = function (slug, change) {
-            const anime = appData.watchlist.find(a => a.slug === slug);
-            if (anime) {
-                const newEp = anime.nb_episodes_vus + change;
-                if (newEp >= 0 && newEp <= anime.max_episodes) {
-                    anime.nb_episodes_vus = newEp;
-                    anime.par = currentUser; // Met à jour l'auteur du changement d'épisode
-                    saveDB();
-                    renderWatchlist();
-                }
+            // Badge Prénom connecté dans le menu
+            const menu = document.getElementById('menu-links');
+            if (menu) {
+                menu.innerHTML += `<li><span style="font-family:'Space Grotesk'; font-weight:700; font-size:14px; padding:10px 15px; background:var(--text-main); color:var(--white); border-radius:var(--radius-pill); display:inline-block; margin-left:10px;">By: ${currentUser}</span></li>`;
             }
-        };
+        });
     </script>
 
 </body>
